@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLC Student OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ RESET & VARS ═══════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#1E2A5E;--navy-d:#0f1a3e;--navy-m:#162040;
+  --red:#E53935;--red-d:#c62828;
+  --w:#fff;--g50:#F8F9FC;--g100:#F1F3F9;--g200:#E2E6F0;
+  --g400:#8892B0;--g600:#4A5278;--g900:#1A1F3A;
+  --green:#10B981;--amber:#F59E0B;--blue:#2563EB;
+  --sidebar:220px;--r:16px;--rs:10px;
+  --sh:0 2px 12px rgba(30,42,94,.07);--shm:0 6px 24px rgba(30,42,94,.13);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--g50);color:var(--g900);overflow-x:hidden}
+button{border:none;background:none;cursor:pointer;font-family:inherit}
+input{font-family:inherit;outline:none}
+
+/* ═══════════ PAGES ═══════════ */
+.page{display:none;animation:fadeUp .3s ease}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══════════ LANDING ═══════════ */
+#landing{min-height:100vh}
+.lnav{display:flex;align-items:center;justify-content:space-between;padding:18px 52px;position:absolute;top:0;left:0;right:0;z-index:10}
+.lnav-logo{display:flex;align-items:center;gap:10px}
+.lnav-badge{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff;font-size:11px;font-weight:900;display:flex;align-items:center;justify-content:center;letter-spacing:-.5px}
+.lnav-name{color:#fff;font-size:13px;font-weight:700}
+.lnav-links{display:flex;align-items:center;gap:20px}
+.lnav-link{color:rgba(255,255,255,.75);font-size:13px;font-weight:500;cursor:pointer;transition:color .2s}
+.lnav-link:hover{color:#fff}
+.lnav-cta{padding:9px 22px;background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff;border-radius:12px;font-size:13px;font-weight:700;transition:all .2s;box-shadow:0 4px 14px rgba(229,57,53,.4)}
+.lnav-cta:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(229,57,53,.5)}
+
+.hero{background:linear-gradient(135deg,#080f2a 0%,#1E2A5E 55%,#10193a 100%);min-height:620px;position:relative;overflow:hidden;display:flex;align-items:center}
+.hero-glow{position:absolute;border-radius:50%;pointer-events:none;filter:blur(90px)}
+.hero-grid{position:absolute;inset:0;background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,.03) 39px,rgba(255,255,255,.03) 40px),repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(255,255,255,.03) 39px,rgba(255,255,255,.03) 40px)}
+.hero-inner{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;padding:120px 52px 80px;position:relative;z-index:2;max-width:1280px;margin:0 auto;width:100%}
+.hero-pill{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:20px;color:rgba(255,255,255,.8);font-size:11px;font-weight:600;margin-bottom:20px}
+.hero-dot{width:6px;height:6px;background:#4ADE80;border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero-h1{font-size:58px;font-weight:900;color:#fff;line-height:.95;letter-spacing:-2px;margin-bottom:8px}
+.hero-outline{-webkit-text-stroke:2.5px var(--red);color:transparent}
+.hero-h2{font-size:38px;font-weight:900;color:#fff;line-height:1.05;letter-spacing:-1px;margin-bottom:20px}
+.hero-p{color:#93A8D4;font-size:15px;line-height:1.75;margin-bottom:30px;max-width:460px}
+.hero-btns{display:flex;gap:12px;margin-bottom:36px}
+.btn-main{padding:15px 30px;border-radius:16px;background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff;font-size:15px;font-weight:800;transition:all .25s;box-shadow:0 6px 20px rgba(229,57,53,.4)}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(229,57,53,.5)}
+.btn-ghost{padding:15px 30px;border-radius:16px;border:1.5px solid rgba(255,255,255,.2);color:#fff;font-size:15px;font-weight:700;transition:all .2s}
+.btn-ghost:hover{background:rgba(255,255,255,.08)}
+.hero-stats{display:flex;gap:36px}
+.hstat-val{font-size:26px;font-weight:900;color:#fff}
+.hstat-lbl{font-size:11px;color:#93A8D4;margin-top:1px}
+
+.hero-card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:24px;padding:18px;backdrop-filter:blur(10px)}
+.hc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.hc-stat{background:rgba(255,255,255,.08);border-radius:14px;padding:12px 14px}
+.hc-emoji{font-size:18px;margin-bottom:4px}
+.hc-val{font-size:20px;font-weight:900;color:#fff}
+.hc-lbl{font-size:9px;color:rgba(255,255,255,.45);margin-top:1px}
+.hc-chart{background:rgba(255,255,255,.08);border-radius:14px;padding:10px 14px}
+.hc-chart-lbl{font-size:9px;color:rgba(255,255,255,.45);margin-bottom:8px}
+.hc-bars{display:flex;align-items:flex-end;gap:4px;height:40px}
+.hc-bar{flex:1;border-radius:3px 3px 0 0;transition:height .6s}
+
+.features-s{background:var(--g50);padding:72px 52px}
+.sec-title{font-size:32px;font-weight:900;text-align:center;color:var(--g900);margin-bottom:10px}
+.sec-sub{font-size:14px;color:var(--g400);text-align:center;margin-bottom:48px;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.7}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:1100px;margin:0 auto}
+.feat-card{background:#fff;border-radius:20px;border:1.5px solid var(--g100);padding:28px;box-shadow:var(--sh);transition:all .3s}
+.feat-card:hover{transform:translateY(-4px);box-shadow:var(--shm)}
+.feat-icon{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:18px}
+.feat-title{font-size:17px;font-weight:800;color:var(--g900);margin-bottom:8px}
+.feat-desc{font-size:13px;color:var(--g400);line-height:1.7}
+
+.testi-s{background:linear-gradient(135deg,var(--navy-d),var(--navy));padding:72px 52px}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;max-width:1100px;margin:0 auto}
+.testi-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:24px;transition:all .3s}
+.testi-card:hover{background:rgba(255,255,255,.12);transform:translateY(-3px)}
+.testi-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.testi-av{font-size:28px}
+.testi-name{color:#fff;font-size:13px;font-weight:700}
+.testi-dur{color:#93A8D4;font-size:10px;margin-top:2px}
+.testi-score{margin-left:auto;padding:3px 10px;background:rgba(229,57,53,.25);border:1px solid rgba(239,154,154,.3);border-radius:20px;color:#EF9A9A;font-size:11px;font-weight:700}
+.testi-q{color:#93A8D4;font-size:12px;line-height:1.75}
+
+.cta-s{background:#fff;padding:72px 52px;text-align:center}
+.cta-h{font-size:36px;font-weight:900;color:var(--g900);margin-bottom:12px}
+.cta-sub{font-size:15px;color:var(--g400);margin-bottom:30px}
+.cta-btn{display:inline-block;padding:17px 44px;border-radius:16px;background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff;font-size:16px;font-weight:800;transition:all .25s;box-shadow:0 6px 20px rgba(229,57,53,.35);cursor:pointer}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(229,57,53,.5)}
+.cta-tag{font-size:12px;color:var(--g400);margin-top:14px;letter-spacing:.5px}
+
+/* ═══════════ APP SHELL ═══════════ */
+#app{display:none;height:100vh;overflow:hidden}
+#app.active{display:flex}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:linear-gradient(180deg,var(--navy-d) 0%,var(--navy) 60%,var(--navy-m) 100%);display:flex;flex-direction:column;height:100vh;overflow:hidden;transition:width .3s}
+.sidebar.collapsed{width:64px}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:20px 16px 18px;border-bottom:1px solid rgba(255,255,255,.07);overflow:hidden}
+.sb-badge{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-text{overflow:hidden;white-space:nowrap}
+.sb-t1{color:#fff;font-size:13px;font-weight:800}
+.sb-t2{color:#93A8D4;font-size:10px;margin-top:1px}
+.sb-toggle{margin-left:auto;color:rgba(255,255,255,.35);padding:4px;border-radius:6px;transition:color .2s;flex-shrink:0}
+.sb-toggle:hover{color:#fff}
+.sb-nav{flex:1;padding:10px 8px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;overflow-x:hidden}
+.sb-nav::-webkit-scrollbar{display:none}
+.nav-btn{width:100%;display:flex;align-items:center;gap:10px;padding:10px 10px;border-radius:12px;color:#93A8D4;font-size:13px;font-weight:500;transition:all .2s;white-space:nowrap;overflow:hidden}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-btn.active{background:var(--red);color:#fff}
+.nav-btn svg{flex-shrink:0}
+.nav-dot{width:5px;height:5px;background:#fff;border-radius:50%;margin-left:auto;flex-shrink:0}
+.sb-profile{padding:14px 16px 18px;border-top:1px solid rgba(255,255,255,.07);display:flex;align-items:center;gap:10px;overflow:hidden}
+.sb-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#ef9a9a,var(--red));color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sb-pname{color:#fff;font-size:12px;font-weight:600;white-space:nowrap}
+.sb-psub{color:#93A8D4;font-size:10px;white-space:nowrap}
+
+/* ── MAIN ── */
+.main-wrap{flex:1;overflow-y:auto;background:var(--g50)}
+.main-wrap::-webkit-scrollbar{width:4px}
+.main-wrap::-webkit-scrollbar-thumb{background:var(--g200);border-radius:4px}
+.main-inner{padding:28px 32px;max-width:1140px}
+
+/* ── TOP BAR ── */
+.topbar{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px}
+.tb-title{font-size:23px;font-weight:900;color:var(--g900);letter-spacing:-.5px;line-height:1.2}
+.tb-sub{font-size:12px;color:var(--g400);margin-top:3px}
+.tb-actions{display:flex;align-items:center;gap:8px}
+.tb-search{display:flex;align-items:center;gap:7px;background:#fff;border:1.5px solid var(--g200);border-radius:12px;padding:7px 12px;font-size:12px;color:var(--g400);width:190px;transition:border-color .2s}
+.tb-search:focus-within{border-color:#93A8D4}
+.tb-search input{border:none;background:none;font-size:12px;color:var(--g900);width:100%}
+.tb-search input::placeholder{color:var(--g400)}
+.ib{width:34px;height:34px;border-radius:10px;background:#fff;border:1.5px solid var(--g200);display:flex;align-items:center;justify-content:center;color:var(--g600);position:relative;transition:all .2s;cursor:pointer}
+.ib:hover{background:var(--g50);border-color:var(--g400)}
+.ib-dot{position:absolute;top:-2px;right:-2px;width:7px;height:7px;background:var(--red);border-radius:50%;border:2px solid var(--g50)}
+
+/* ── CARDS ── */
+.card{background:#fff;border-radius:var(--r);border:1.5px solid var(--g100);box-shadow:var(--sh);transition:all .25s}
+.card:hover{box-shadow:var(--shm)}
+.card.no-hover:hover{box-shadow:var(--sh)}
+
+/* ── GRIDS ── */
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
+.g2-1{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px}
+.g3-2{display:grid;grid-template-columns:3fr 2fr;gap:14px;margin-bottom:16px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+
+/* ── BADGES ── */
+.bdg{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.bdg-blue{background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE}
+.bdg-red{background:#FEF2F2;color:var(--red);border:1px solid #FECACA}
+.bdg-green{background:#ECFDF5;color:#059669;border:1px solid #A7F3D0}
+.bdg-amber{background:#FFFBEB;color:#D97706;border:1px solid #FDE68A}
+
+/* ── PROG BAR ── */
+.pt{background:var(--g100);border-radius:99px;overflow:hidden}
+.pf{height:100%;border-radius:99px;transition:width .8s ease}
+
+/* ── STAT CARDS ── */
+.sc{padding:16px}
+.sc-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px}
+.sc-val{font-size:21px;font-weight:900;color:var(--g900)}
+.sc-lbl{font-size:11px;color:var(--g400);margin-top:2px}
+.sc-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px}
+.sc-sub{font-size:10px;color:var(--g400)}
+
+/* ── SECTION HEADER ── */
+.sh{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--g400);margin-bottom:12px}
+
+/* ── TASK ITEM ── */
+.ti{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:12px;border:1.5px solid var(--g100);margin-bottom:6px;background:#fff;transition:border-color .2s;cursor:pointer}
+.ti:hover{border-color:var(--g200)}
+.tc{width:17px;height:17px;border-radius:5px;border:2px solid var(--g200);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;font-size:9px;color:#fff}
+.tc.done{background:var(--green);border-color:var(--green)}
+.tt{flex:1;font-size:12px;color:var(--g600);transition:all .2s}
+.tt.done{text-decoration:line-through;color:var(--g400)}
+
+/* ── VOCAB ── */
+.vi{padding:9px 11px;border-radius:12px;border:1.5px solid var(--g100);margin-bottom:6px;transition:all .2s}
+.vi.learned{background:#ECFDF5;border-color:#A7F3D0}
+.vw{font-size:12px;font-weight:700;color:var(--g900);display:flex;align-items:center;justify-content:space-between}
+.vi.learned .vw{color:#059669}
+.vd{font-size:10px;color:var(--g400);margin-top:2px}
+
+/* ── AI PANEL ── */
+.aip{background:linear-gradient(135deg,var(--navy-d),var(--navy));border-radius:var(--r);padding:20px}
+.aip-hd{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+.aip-ico{width:30px;height:30px;border-radius:9px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:15px}
+.aip-ttl{color:#fff;font-size:13px;font-weight:700}
+.aip-body{color:#93A8D4;font-size:12px;line-height:1.65;margin-bottom:12px}
+.aip-body strong{color:#fff}
+.aip-tip{display:flex;align-items:center;gap:7px;font-size:11px;color:#93A8D4;margin-bottom:5px}
+.aip-dot{width:4px;height:4px;background:#ef9a9a;border-radius:50%;flex-shrink:0}
+
+/* ── SKILL TABS ── */
+.stabs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stab{border-radius:16px;border:2px solid var(--g100);background:#fff;padding:14px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;transition:all .2s}
+.stab:hover{border-color:var(--g200);transform:translateY(-1px)}
+.stab.active{border-color:transparent;color:#fff}
+.stab-icon{font-size:22px}
+.stab-name{font-size:12px;font-weight:700}
+
+/* ── MODULE CARD ── */
+.mc{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:16px;border:1.5px solid var(--g100);background:#fff;margin-bottom:10px;transition:all .25s}
+.mc:hover{border-color:var(--g200);box-shadow:var(--sh)}
+.mc-ico{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.mc-ttl{font-size:13px;font-weight:700;color:var(--g900);margin-bottom:3px}
+.mc-meta{font-size:11px;color:var(--g400);margin-bottom:6px}
+.mc-btn{padding:7px 16px;border-radius:10px;font-size:11px;font-weight:700;color:#fff;cursor:pointer;white-space:nowrap;transition:all .2s}
+.mc-btn:hover{opacity:.9;transform:translateY(-1px)}
+
+/* ── CHAT ── */
+.chat-wrap{display:flex;flex-direction:column;border-radius:var(--r);border:1.5px solid var(--g100);overflow:hidden;background:#fff}
+.chat-hd{padding:14px 18px;display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,var(--navy-d),var(--navy))}
+.chat-online{font-size:10px;color:#93A8D4;display:flex;align-items:center;gap:5px}
+.online-dot{width:5px;height:5px;background:#4ADE80;border-radius:50%;animation:pulse 2s infinite}
+.chat-msgs{flex:1;padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;background:var(--g50);height:360px}
+.chat-msgs::-webkit-scrollbar{width:3px}
+.chat-msgs::-webkit-scrollbar-thumb{background:var(--g200);border-radius:3px}
+.msg-row{display:flex;gap:8px}
+.msg-row.user{flex-direction:row-reverse}
+.msg-av{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0}
+.msg-av.ai-a{background:#EFF6FF;color:var(--blue)}
+.msg-av.usr-a{background:#FEF2F2;color:var(--red)}
+.msg-bub{max-width:78%;padding:10px 13px;border-radius:14px;font-size:12px;line-height:1.65}
+.msg-bub.ai-b{background:#fff;border:1.5px solid var(--g100);color:var(--g600);border-top-left-radius:4px}
+.msg-bub.usr-b{background:linear-gradient(135deg,var(--red),var(--red-d));color:#fff;border-top-right-radius:4px}
+.chat-in{padding:10px 12px;border-top:1px solid var(--g100);display:flex;gap:8px}
+.chat-inp{flex:1;padding:8px 13px;border-radius:11px;border:1.5px solid var(--g200);font-size:12px;color:var(--g900);background:var(--g50);transition:border-color .2s}
+.chat-inp:focus{border-color:#93A8D4;background:#fff}
+.chat-inp::placeholder{color:var(--g400)}
+.send-btn{width:36px;height:36px;border-radius:11px;background:linear-gradient(135deg,var(--red),var(--red-d));display:flex;align-items:center;justify-content:center;color:#fff;cursor:pointer;transition:all .2s;flex-shrink:0}
+.send-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(229,57,53,.4)}
+.typing{display:flex;gap:4px;align-items:center;padding:10px 13px}
+.typing span{width:7px;height:7px;background:var(--g400);border-radius:50%;animation:bounce .9s infinite}
+.typing span:nth-child(2){animation-delay:.15s}
+.typing span:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+
+/* ── PROGRESS PAGE ── */
+.radial-wrap{display:flex;align-items:center;gap:22px}
+.skills-list{display:flex;flex-direction:column;gap:11px}
+.skill-row{display:flex;align-items:center;gap:10px}
+.skill-name{font-size:12px;font-weight:500;color:var(--g700);width:72px;flex-shrink:0}
+
+/* ── BADGES GRID ── */
+.badges-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.badge-item{border-radius:16px;border:2px solid var(--g100);padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:5px;text-align:center;transition:all .3s;cursor:pointer}
+.badge-item:hover{transform:translateY(-3px)}
+.badge-item.unlocked{border-color:#FDE68A;background:linear-gradient(to bottom,#FFFBEB,#FEF3C7)}
+.badge-item.unlocked:hover{box-shadow:0 6px 20px rgba(245,158,11,.2)}
+.badge-emoji{font-size:28px}
+.badge-name{font-size:10px;font-weight:700;color:var(--g900)}
+.badge-desc{font-size:9px;color:var(--g400);line-height:1.3}
+.badge-earned{font-size:9px;font-weight:700;color:#D97706}
+
+/* ── COMMUNITY ── */
+.post-card{padding:18px;margin-bottom:10px}
+.post-hd{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.post-av{font-size:24px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--g50);border-radius:50%;flex-shrink:0}
+.post-name{font-size:13px;font-weight:700;color:var(--g900)}
+.post-time{font-size:10px;color:var(--g400);margin-left:auto}
+.post-body{font-size:12px;color:var(--g600);line-height:1.7;margin-bottom:10px}
+.post-actions{display:flex;gap:14px}
+.post-act{font-size:11px;color:var(--g400);cursor:pointer;transition:color .2s;display:flex;align-items:center;gap:4px}
+.post-act:hover{color:var(--red)}
+
+/* ── COURSES ── */
+.course-card{padding:18px;display:flex;align-items:flex-start;gap:14px}
+.course-ico{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0}
+
+/* ── EXAMS ── */
+.exam-row{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;border:1.5px solid var(--g100);background:#fff;margin-bottom:8px;transition:all .2s}
+.exam-row:hover{border-color:var(--g200);box-shadow:var(--sh)}
+.exam-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── CHART HELPER CLASSES ── */
+.weekly-bars{display:flex;align-items:flex-end;gap:5px}
+.wbar-wrap{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1}
+.wbar{width:100%;border-radius:4px 4px 0 0;transition:height .7s}
+.wday{font-size:9px;color:var(--g400)}
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media(max-width:900px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .g2-1,.g3-2,.g3{grid-template-columns:1fr}
+  .hero-inner{grid-template-columns:1fr;padding:100px 24px 60px}
+  .hero-card{display:none}
+  .feat-grid,.testi-grid{grid-template-columns:1fr}
+  .features-s,.testi-s,.cta-s{padding:48px 24px}
+  .lnav{padding:16px 24px}
+  .badges-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════ -->
+<!-- LANDING PAGE                            -->
+<!-- ════════════════════════════════════════ -->
+<div id="landing" class="page active">
+
+  <!-- NAV -->
+  <nav class="lnav">
+    <div class="lnav-logo">
+      <div class="lnav-badge">CLC</div>
+      <span class="lnav-name">Customized Learning Culture</span>
+    </div>
+    <div class="lnav-links">
+      <span class="lnav-link">Features</span>
+      <span class="lnav-link">Testimonials</span>
+      <button class="lnav-cta" onclick="enterApp()">Access Dashboard</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-glow" style="width:350px;height:350px;background:#E53935;opacity:.12;top:-80px;left:35%"></div>
+    <div class="hero-glow" style="width:500px;height:500px;background:#3b5bdb;opacity:.09;bottom:-150px;right:5%"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-inner">
+      <div>
+        <div class="hero-pill"><div class="hero-dot"></div>Trusted by 2,000+ students in Vietnam</div>
+        <div class="hero-h1">More than<br><span class="hero-outline">IELTS.</span></div>
+        <div class="hero-h2">A Customized<br>Learning Culture.</div>
+        <p class="hero-p">The first AI-powered Student OS designed for IELTS success. Personalized paths, real-time feedback, and a community that grows with you.</p>
+        <div class="hero-btns">
+          <button class="btn-main" onclick="enterApp()">Start Learning Free</button>
+          <button class="btn-ghost">Watch Demo ▶</button>
+        </div>
+        <div class="hero-stats">
+          <div><div class="hstat-val">2,000+</div><div class="hstat-lbl">Students</div></div>
+          <div><div class="hstat-val">7.5+</div><div class="hstat-lbl">Avg. Target Band</div></div>
+          <div><div class="hstat-val">94%</div><div class="hstat-lbl">Success Rate</div></div>
+        </div>
+      </div>
+      <div class="hero-card">
+        <div class="hc-grid">
+          <div class="hc-stat"><div class="hc-emoji">🎯</div><div class="hc-val">7.0</div><div class="hc-lbl">Band Score</div></div>
+          <div class="hc-stat"><div class="hc-emoji">🔥</div><div class="hc-val">9 days</div><div class="hc-lbl">Streak</div></div>
+          <div class="hc-stat"><div class="hc-emoji">📚</div><div class="hc-val">1,234</div><div class="hc-lbl">Words Learned</div></div>
+          <div class="hc-stat"><div class="hc-emoji">🤖</div><div class="hc-val">47</div><div class="hc-lbl">AI Sessions</div></div>
+        </div>
+        <div class="hc-chart">
+          <div class="hc-chart-lbl">Band Score Progression</div>
+          <div class="hc-bars">
+            <div class="hc-bar" style="height:20%;background:rgba(255,255,255,.2)"></div>
+            <div class="hc-bar" style="height:30%;background:rgba(255,255,255,.2)"></div>
+            <div class="hc-bar" style="height:30%;background:rgba(255,255,255,.2)"></div>
+            <div class="hc-bar" style="height:50%;background:rgba(255,255,255,.25)"></div>
+            <div class="hc-bar" style="height:50%;background:rgba(255,255,255,.25)"></div>
+            <div class="hc-bar" style="height:70%;background:rgba(255,255,255,.3)"></div>
+            <div class="hc-bar" style="height:70%;background:rgba(255,255,255,.3)"></div>
+            <div class="hc-bar" style="height:92%;background:#E53935"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features-s">
+    <div class="sec-title">Built for IELTS success.</div>
+    <div class="sec-sub">Every feature is designed to accelerate your band score and build lasting English fluency.</div>
+    <div class="feat-grid">
+      <div class="feat-card"><div class="feat-icon" style="background:#EFF6FF">🤖</div><div class="feat-title">AI Tutor</div><div class="feat-desc">24/7 personalized feedback on essays, speaking, grammar, and vocabulary. Like having a private tutor always available.</div></div>
+      <div class="feat-card"><div class="feat-icon" style="background:#FEF2F2">🎯</div><div class="feat-title">Smart Learning Path</div><div class="feat-desc">Your curriculum adapts to your strengths and weaknesses. Purely customized — no one-size-fits-all approach.</div></div>
+      <div class="feat-card"><div class="feat-icon" style="background:#FFFBEB">📊</div><div class="feat-title">Real-time Progress</div><div class="feat-desc">Track every study session, vocabulary word, and band score improvement with beautiful, motivating analytics.</div></div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIALS -->
+  <div class="testi-s">
+    <div class="sec-title" style="color:#fff">Students who transformed their scores.</div>
+    <div class="sec-sub" style="color:#93A8D4">Real results from real CLC students.</div>
+    <div class="testi-grid">
+      <div class="testi-card"><div class="testi-head"><div class="testi-av">🧑‍🎓</div><div><div class="testi-name">Nguyen Thi Lan</div><div class="testi-dur">6 months</div></div><div class="testi-score">5.5 → 7.5</div></div><div class="testi-q">"CLC's AI Tutor gave me personalized feedback I couldn't get anywhere else. My writing jumped from 5.5 to 7.5!"</div></div>
+      <div class="testi-card"><div class="testi-head"><div class="testi-av">👨‍💼</div><div><div class="testi-name">Tran Minh Duc</div><div class="testi-dur">8 months</div></div><div class="testi-score">6.0 → 8.0</div></div><div class="testi-q">"The speaking streak feature kept me consistent. I practiced every single day and hit Band 8 for speaking!"</div></div>
+      <div class="testi-card"><div class="testi-head"><div class="testi-av">👩‍💻</div><div><div class="testi-name">Le Phuong Anh</div><div class="testi-dur">4 months</div></div><div class="testi-score">5.0 → 6.5</div></div><div class="testi-q">"As a working professional, the personalized daily plan was a game-changer. I studied smarter, not harder."</div></div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-s">
+    <div class="cta-h">Ready to start your journey?</div>
+    <div class="cta-sub">Join thousands of Vietnamese students who chose CLC for their IELTS preparation.</div>
+    <button class="cta-btn" onclick="enterApp()">Access Student Dashboard →</button>
+    <div class="cta-tag">HƠN CẢ MỘT CHỨNG CHỈ IELTS</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- APP SHELL                               -->
+<!-- ════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-badge">CLC</div>
+      <div class="sb-text"><div class="sb-t1">CLC</div><div class="sb-t2">Student OS</div></div>
+      <button class="sb-toggle" onclick="toggleSidebar()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+    <nav class="sb-nav">
+      <button class="nav-btn active" id="nb-dashboard" onclick="showPage('dashboard')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Dashboard</span><div class="nav-dot"></div>
+      </button>
+      <button class="nav-btn" id="nb-courses" onclick="showPage('courses')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>My Courses</span>
+      </button>
+      <button class="nav-btn" id="nb-lab" onclick="showPage('lab')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v11l3 3 3-3V3M5 9H3m18 0h-2"/></svg>
+        <span>Practice Lab</span>
+      </button>
+      <button class="nav-btn" id="nb-ai" onclick="showPage('ai')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M19.07 4.93l-1.41 1.41M6.34 17.66l-1.41 1.41M5.64 5.64l1.41 1.41M16.95 16.95l1.41 1.41"/></svg>
+        <span>AI Tutor</span>
+      </button>
+      <button class="nav-btn" id="nb-progress" onclick="showPage('progress')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span>Progress</span>
+      </button>
+      <button class="nav-btn" id="nb-exams" onclick="showPage('exams')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span>Exams</span>
+      </button>
+      <button class="nav-btn" id="nb-community" onclick="showPage('community')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Community</span>
+      </button>
+    </nav>
+    <div class="sb-profile">
+      <div class="sb-av">P</div>
+      <div><div class="sb-pname">Phuong Anh</div><div class="sb-psub">Band 6.5 → 7.0</div></div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT AREA -->
+  <div class="main-wrap">
+    <div class="main-inner">
+
+      <!-- ── DASHBOARD ── -->
+      <div id="pg-dashboard" class="page active">
+        <div class="topbar">
+          <div><div class="tb-title">Your English Journey Today</div><div class="tb-sub">Focus on: 1 speaking session, 3 new words, 1 writing task.</div></div>
+          <div class="tb-actions">
+            <div class="tb-search"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Search..."></div>
+            <div class="ib"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><div class="ib-dot"></div></div>
+            <div class="ib"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/></svg></div>
+          </div>
+        </div>
+
+        <div class="g4">
+          <div class="card sc"><div class="sc-top"><div class="sc-icon" style="background:#FEF2F2">🎯</div><span class="sc-sub">Target: 7.0</span></div><div class="sc-val">6.5</div><div class="sc-lbl">IELTS Band Score</div></div>
+          <div class="card sc"><div class="sc-top"><div class="sc-icon" style="background:#EFF6FF">📚</div><span class="sc-sub">+9 today</span></div><div class="sc-val">1,234</div><div class="sc-lbl">Vocab Words</div></div>
+          <div class="card sc"><div class="sc-top"><div class="sc-icon" style="background:#FFFBEB">🔥</div><span class="sc-sub">Best: 14</span></div><div class="sc-val">9 days</div><div class="sc-lbl">Speaking Streak</div></div>
+          <div class="card sc"><div class="sc-top"><div class="sc-icon" style="background:#ECFDF5">⚡</div><span class="sc-sub">This month</span></div><div class="sc-val">47h</div><div class="sc-lbl">Study Hours</div></div>
+        </div>
+
+        <div class="g2-1">
+          <div class="card no-hover" style="padding:20px">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+              <div><div style="font-size:14px;font-weight:800;color:var(--g900)">Band Score Progression</div><div style="font-size:11px;color:var(--g400)">8-week journey</div></div>
+              <div style="display:flex;gap:10px;align-items:center"><span style="font-size:11px;color:var(--g400)">Start: 5.0</span><span style="font-size:11px;font-weight:700;color:var(--red)">Now: 7.0</span></div>
+            </div>
+            <svg viewBox="0 0 460 120" style="width:100%">
+              <defs><linearGradient id="g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E53935" stop-opacity=".25"/><stop offset="100%" stop-color="#E53935" stop-opacity="0"/></linearGradient></defs>
+              <polygon points="10,108 76,91 142,91 208,61 274,61 340,31 406,31 445,11 445,108" fill="url(#g1)"/>
+              <polyline points="10,108 76,91 142,91 208,61 274,61 340,31 406,31 445,11" fill="none" stroke="#E53935" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="10" cy="108" r="3.5" fill="#E53935"/><circle cx="76" cy="91" r="3.5" fill="#E53935"/><circle cx="142" cy="91" r="3.5" fill="#E53935"/><circle cx="208" cy="61" r="3.5" fill="#E53935"/><circle cx="274" cy="61" r="3.5" fill="#E53935"/><circle cx="340" cy="31" r="3.5" fill="#E53935"/><circle cx="406" cy="31" r="3.5" fill="#E53935"/>
+              <circle cx="445" cy="11" r="9" fill="#E53935" fill-opacity=".2"/><circle cx="445" cy="11" r="4" fill="#E53935"/>
+              <text x="445" y="7" text-anchor="middle" font-size="9.5" fill="#E53935" font-weight="bold" font-family="Plus Jakarta Sans,sans-serif">7.0</text>
+              <text x="10" y="116" text-anchor="middle" font-size="8.5" fill="#8892b0" font-family="Plus Jakarta Sans,sans-serif">W1</text><text x="76" y="116" text-anchor="middle" font-size="8.5" fill="#8892b0" font-family="Plus Jakarta Sans,sans-serif">W2</text><text x="142" y="116" text-anchor="middle" font-size="8.5" fill="#8892b0" font-family="Plus Jakarta Sans,sans-serif">W3</text><text x="208" y="116" text-anchor="middle" font-size="8.5" fill="#8892b0" font-family="Plus Jakarta Sans,sans-serif">W4</text><text x="274" y="116" text-anchor="middle" font-size="8.5" fill="#8892b0" font-family="Plus Jakarta Sans,sans-serif">W5</text><text x="340" y="116" text-anchor="middle" font-size="8.5" fill="#8892b0" font-family="Plus Jakarta Sans,sans-serif">W6</text><text x="406" y="116" text-anchor="middle" font-size="8.5" fill="#8892b0" font-family="Plus Jakarta Sans,sans-serif">W7</text><text x="445" y="116" text-anchor="middle" font-size="8.5" fill="#8892b0" font-family="Plus Jakarta Sans,sans-serif">W8</text>
+            </svg>
+          </div>
+          <div class="aip">
+            <div class="aip-hd"><div class="aip-ico">🤖</div><div class="aip-ttl">AI Tutor Insight</div></div>
+            <div class="aip-body">Based on your last 3 essays, your <strong>grammatical range</strong> is improving but <strong>cohesion</strong> needs attention. Focus on linking devices today.</div>
+            <div class="aip-tip"><div class="aip-dot"></div>Practice complex sentences</div>
+            <div class="aip-tip"><div class="aip-dot"></div>Review cohesive devices</div>
+            <div class="aip-tip"><div class="aip-dot"></div>Use 'Conditionals' structures</div>
+            <button onclick="showPage('ai')" style="margin-top:14px;width:100%;padding:8px;border-radius:10px;background:rgba(255,255,255,.12);color:#fff;font-size:11px;font-weight:700;transition:all .2s" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">Open AI Tutor →</button>
+          </div>
+        </div>
+
+        <div class="g2-1">
+          <div class="card no-hover" style="padding:18px">
+            <div style="font-size:14px;font-weight:800;color:var(--g900);margin-bottom:14px">Learning Feed</div>
+            <div id="task-list"></div>
+          </div>
+          <div class="card no-hover" style="padding:18px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div style="font-size:14px;font-weight:800;color:var(--g900)">Daily Words</div>
+              <span style="font-size:11px;color:var(--g400)">2/3 learned</span>
+            </div>
+            <div class="vi learned"><div class="vw">Enthusiastic <span>✓</span></div><div class="vd">having or showing intense enjoyment</div></div>
+            <div class="vi learned"><div class="vw">Ambiguous <span>✓</span></div><div class="vd">open to more than one interpretation</div></div>
+            <div class="vi"><div class="vw">Persist</div><div class="vd">continue firmly despite difficulty</div></div>
+            <div class="vi"><div class="vw">Meticulous</div><div class="vd">showing great attention to detail</div></div>
+            <div class="pt" style="height:6px;margin-top:14px"><div class="pf" style="width:66%;background:linear-gradient(to right,#1E2A5E,#2d3d82)"></div></div>
+            <div style="font-size:10px;color:var(--g400);text-align:center;margin-top:6px">2 of 3 words mastered today</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── COURSES ── -->
+      <div id="pg-courses" class="page">
+        <div class="topbar"><div><div class="tb-title">My Courses</div><div class="tb-sub">Your personalized learning curriculum.</div></div></div>
+        <div class="g2">
+          <div class="card course-card"><div class="course-ico" style="background:#EFF6FF">📚</div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div style="font-size:14px;font-weight:800">IELTS Academic Band 6-7</div><span class="bdg bdg-blue">Intermediate</span></div><div style="font-size:11px;color:var(--g400);margin-bottom:8px">24 lessons · 16 completed</div><div class="pt" style="height:7px;margin-bottom:6px"><div class="pf" style="width:68%;background:#1E2A5E"></div></div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;color:var(--g400)">68% complete</span><button style="padding:6px 14px;border-radius:9px;background:#1E2A5E;color:#fff;font-size:11px;font-weight:700">Continue</button></div></div></div>
+          <div class="card course-card"><div class="course-ico" style="background:#FEF2F2">✍️</div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div style="font-size:14px;font-weight:800">IELTS Writing Masterclass</div><span class="bdg bdg-red">Advanced</span></div><div style="font-size:11px;color:var(--g400);margin-bottom:8px">18 lessons · 8 completed</div><div class="pt" style="height:7px;margin-bottom:6px"><div class="pf" style="width:45%;background:#E53935"></div></div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;color:var(--g400)">45% complete</span><button style="padding:6px 14px;border-radius:9px;background:#E53935;color:#fff;font-size:11px;font-weight:700">Continue</button></div></div></div>
+          <div class="card course-card"><div class="course-ico" style="background:#FFFBEB">🎙️</div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div style="font-size:14px;font-weight:800">Spoken English Fluency</div><span class="bdg bdg-amber">Intermediate</span></div><div style="font-size:11px;color:var(--g400);margin-bottom:8px">30 lessons · 6 completed</div><div class="pt" style="height:7px;margin-bottom:6px"><div class="pf" style="width:20%;background:#F59E0B"></div></div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;color:var(--g400)">20% complete</span><button style="padding:6px 14px;border-radius:9px;background:#F59E0B;color:#fff;font-size:11px;font-weight:700">Continue</button></div></div></div>
+          <div class="card course-card"><div class="course-ico" style="background:#ECFDF5">🧠</div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><div style="font-size:14px;font-weight:800">Vocabulary Power Pack</div><span class="bdg bdg-green">All Levels</span></div><div style="font-size:11px;color:var(--g400);margin-bottom:8px">15 lessons · 13 completed</div><div class="pt" style="height:7px;margin-bottom:6px"><div class="pf" style="width:88%;background:#10B981"></div></div><div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:11px;color:var(--g400)">88% complete</span><button style="padding:6px 14px;border-radius:9px;background:#10B981;color:#fff;font-size:11px;font-weight:700">Continue</button></div></div></div>
+        </div>
+      </div>
+
+      <!-- ── PRACTICE LAB ── -->
+      <div id="pg-lab" class="page">
+        <div class="topbar"><div><div class="tb-title">Practice Lab</div><div class="tb-sub">Sharpen every skill with structured, IELTS-ready exercises.</div></div></div>
+        <div class="stabs">
+          <div class="stab active" id="stab-listening" style="background:linear-gradient(135deg,#1E2A5E,#2d3d82)" onclick="switchSkill('listening')"><div class="stab-icon">🎧</div><div class="stab-name">Listening</div></div>
+          <div class="stab" id="stab-reading" onclick="switchSkill('reading')"><div class="stab-icon">📖</div><div class="stab-name">Reading</div></div>
+          <div class="stab" id="stab-writing" onclick="switchSkill('writing')"><div class="stab-icon">✍️</div><div class="stab-name">Writing</div></div>
+          <div class="stab" id="stab-speaking" onclick="switchSkill('speaking')"><div class="stab-icon">🎙️</div><div class="stab-name">Speaking</div></div>
+        </div>
+        <div class="g3"><div class="card" style="padding:16px;text-align:center"><div style="font-size:22px;font-weight:900">12</div><div style="font-size:11px;color:var(--g400)">Completed Exercises</div></div><div class="card" style="padding:16px;text-align:center"><div style="font-size:22px;font-weight:900">78%</div><div style="font-size:11px;color:var(--g400)">Avg. Score This Week</div></div><div class="card" style="padding:16px;text-align:center"><div style="font-size:22px;font-weight:900">6.5h</div><div style="font-size:11px;color:var(--g400)">Time Spent This Month</div></div></div>
+        <div class="sh">Available Modules</div>
+        <div id="module-list"></div>
+      </div>
+
+      <!-- ── AI TUTOR ── -->
+      <div id="pg-ai" class="page">
+        <div class="topbar"><div><div class="tb-title">AI Tutor</div><div class="tb-sub">Your 24/7 intelligent IELTS coach — essays, speaking, grammar & more.</div></div></div>
+        <div style="display:grid;grid-template-columns:210px 1fr;gap:14px">
+          <div class="card no-hover" style="padding:14px">
+            <div class="sh">Quick Prompts</div>
+            <div style="display:flex;flex-direction:column;gap:6px" id="prompt-list"></div>
+            <div style="margin-top:12px;padding:10px;border-radius:11px;background:#EFF6FF;border:1.5px solid #BFDBFE">
+              <div style="font-size:10px;font-weight:700;color:var(--g900);margin-bottom:4px">⭐ Today's Focus</div>
+              <div style="font-size:11px;color:var(--g600)">Practice Conditionals in Writing Task 2</div>
+            </div>
+          </div>
+          <div class="chat-wrap">
+            <div class="chat-hd">
+              <div style="width:32px;height:32px;border-radius:9px;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:16px">🤖</div>
+              <div><div style="color:#fff;font-size:13px;font-weight:700">CLC AI Tutor</div><div class="chat-online"><div class="online-dot"></div>Online · IELTS Specialist</div></div>
+            </div>
+            <div class="chat-msgs" id="chat-msgs"></div>
+            <div class="chat-in">
+              <input class="chat-inp" id="chat-input" placeholder="Ask about grammar, request essay feedback, simulate speaking..." onkeydown="if(event.key==='Enter')sendMsg()">
+              <div class="send-btn" onclick="sendMsg()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PROGRESS ── -->
+      <div id="pg-progress" class="page">
+        <div class="topbar"><div><div class="tb-title">Progress Tracker</div><div class="tb-sub">Your IELTS journey, visualized.</div></div></div>
+        <div style="display:grid;grid-template-columns:2fr 3fr;gap:14px;margin-bottom:16px">
+          <div style="background:linear-gradient(135deg,var(--navy-d),var(--navy));border-radius:var(--r);padding:22px;display:flex;align-items:center;gap:20px">
+            <svg width="96" height="96" viewBox="0 0 96 96"><circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,.1)" stroke-width="8"/><circle cx="48" cy="48" r="40" fill="none" stroke="#E53935" stroke-width="8" stroke-dasharray="197 251" stroke-linecap="round" transform="rotate(-90 48 48)"/><text x="48" y="44" text-anchor="middle" font-size="19" font-weight="900" fill="#fff" font-family="Plus Jakarta Sans,sans-serif">7.0</text><text x="48" y="57" text-anchor="middle" font-size="8" fill="rgba(255,255,255,.45)" font-family="Plus Jakarta Sans,sans-serif">Overall</text></svg>
+            <div>
+              <div style="color:#fff;font-size:28px;font-weight:900">7.0</div>
+              <div style="color:#93A8D4;font-size:12px">Overall Band Score</div>
+              <div style="color:#4ADE80;font-size:11px;font-weight:600;margin-top:4px">↑ +2.0 since joining CLC</div>
+              <div style="margin-top:10px;padding:6px 10px;border-radius:8px;background:rgba(255,255,255,.1);color:#fff;font-size:11px">🎯 Target: 7.5 by June 2025</div>
+            </div>
+          </div>
+          <div class="card no-hover" style="padding:20px">
+            <div style="font-size:14px;font-weight:800;margin-bottom:16px">Skill Breakdown</div>
+            <div class="skills-list">
+              <div class="skill-row"><span class="skill-name">Listening</span><div class="pt" style="flex:1;height:10px"><div class="pf" style="width:78%;background:#1E2A5E"></div></div><span style="font-size:12px;font-weight:800;color:#1E2A5E;width:30px;text-align:right">7.0</span></div>
+              <div class="skill-row"><span class="skill-name">Reading</span><div class="pt" style="flex:1;height:10px"><div class="pf" style="width:72%;background:#2563EB"></div></div><span style="font-size:12px;font-weight:800;color:#2563EB;width:30px;text-align:right">6.5</span></div>
+              <div class="skill-row"><span class="skill-name">Writing</span><div class="pt" style="flex:1;height:10px"><div class="pf" style="width:67%;background:#E53935"></div></div><span style="font-size:12px;font-weight:800;color:#E53935;width:30px;text-align:right">6.0</span></div>
+              <div class="skill-row"><span class="skill-name">Speaking</span><div class="pt" style="flex:1;height:10px"><div class="pf" style="width:78%;background:#F59E0B"></div></div><span style="font-size:12px;font-weight:800;color:#F59E0B;width:30px;text-align:right">7.0</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="g3-2">
+          <div class="card no-hover" style="padding:20px">
+            <div style="font-size:14px;font-weight:800;margin-bottom:4px">Band Score Over Time</div>
+            <div style="font-size:11px;color:var(--g400);margin-bottom:14px">8-week progression</div>
+            <svg viewBox="0 0 400 110" style="width:100%">
+              <defs><linearGradient id="g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E53935" stop-opacity=".2"/><stop offset="100%" stop-color="#E53935" stop-opacity="0"/></linearGradient></defs>
+              <polygon points="10,98 62,83 114,83 166,57 218,57 270,29 322,29 385,9 385,98" fill="url(#g2)"/>
+              <polyline points="10,98 62,83 114,83 166,57 218,57 270,29 322,29 385,9" fill="none" stroke="#E53935" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="10" cy="98" r="3.5" fill="#E53935"/><circle cx="62" cy="83" r="3.5" fill="#E53935"/><circle cx="114" cy="83" r="3.5" fill="#E53935"/><circle cx="166" cy="57" r="3.5" fill="#E53935"/><circle cx="218" cy="57" r="3.5" fill="#E53935"/><circle cx="270" cy="29" r="3.5" fill="#E53935"/><circle cx="322" cy="29" r="3.5" fill="#E53935"/>
+              <circle cx="385" cy="9" r="7" fill="#E53935" fill-opacity=".2"/><circle cx="385" cy="9" r="4" fill="#E53935"/>
+            </svg>
+          </div>
+          <div class="card no-hover" style="padding:20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+              <div style="font-size:14px;font-weight:800">Weekly Study</div>
+              <span class="bdg bdg-blue">15.5h total</span>
+            </div>
+            <div class="weekly-bars" style="height:100px;align-items:flex-end">
+              <div class="wbar-wrap"><div class="wbar" style="height:40%;background:linear-gradient(to top,#1E2A5E,#2d3d82)"></div><span class="wday">Mon</span></div>
+              <div class="wbar-wrap"><div class="wbar" style="height:67%;background:linear-gradient(to top,#1E2A5E,#2d3d82)"></div><span class="wday">Tue</span></div>
+              <div class="wbar-wrap"><div class="wbar" style="height:53%;background:linear-gradient(to top,#1E2A5E,#2d3d82)"></div><span class="wday">Wed</span></div>
+              <div class="wbar-wrap"><div class="wbar" style="height:80%;background:linear-gradient(to top,#1E2A5E,#2d3d82)"></div><span class="wday">Thu</span></div>
+              <div class="wbar-wrap"><div class="wbar" style="height:27%;background:linear-gradient(to top,#1E2A5E,#2d3d82)"></div><span class="wday">Fri</span></div>
+              <div class="wbar-wrap"><div class="wbar" style="height:93%;background:linear-gradient(to top,#E53935,#ff6b6b)"></div><span class="wday">Sat</span></div>
+              <div class="wbar-wrap"><div class="wbar" style="height:53%;background:linear-gradient(to top,#1E2A5E,#2d3d82)"></div><span class="wday">Sun</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="card no-hover" style="padding:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px"><div style="font-size:14px;font-weight:800">Achievement Badges</div><span style="font-size:11px;color:var(--g400)">3 of 6 unlocked</span></div>
+          <div class="badges-grid">
+            <div class="badge-item unlocked"><div class="badge-emoji">🎙️</div><div class="badge-name">Speaking Star</div><div class="badge-desc">7-day streak</div><div class="badge-earned">✓ Earned</div></div>
+            <div class="badge-item unlocked"><div class="badge-emoji">📚</div><div class="badge-name">Vocab Master</div><div class="badge-desc">500 words</div><div class="badge-earned">✓ Earned</div></div>
+            <div class="badge-item" style="opacity:.4"><div class="badge-emoji">🏆</div><div class="badge-name">Band 7.0</div><div class="badge-desc">Reach Band 7.0</div></div>
+            <div class="badge-item" style="opacity:.4"><div class="badge-emoji">✍️</div><div class="badge-name">Essay Pro</div><div class="badge-desc">10 essays</div></div>
+            <div class="badge-item unlocked"><div class="badge-emoji">🦉</div><div class="badge-name">Night Owl</div><div class="badge-desc">Studied 10pm+</div><div class="badge-earned">✓ Earned</div></div>
+            <div class="badge-item" style="opacity:.4"><div class="badge-emoji">🔥</div><div class="badge-name">Streak God</div><div class="badge-desc">30-day streak</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── EXAMS ── -->
+      <div id="pg-exams" class="page">
+        <div class="topbar"><div><div class="tb-title">Exams & Tests</div><div class="tb-sub">Simulate real IELTS conditions with timed practice tests.</div></div></div>
+        <div class="g3" style="margin-bottom:20px">
+          <div class="card" style="padding:16px;text-align:center"><div style="font-size:22px;font-weight:900">12</div><div style="font-size:11px;color:var(--g400)">Tests Completed</div></div>
+          <div class="card" style="padding:16px;text-align:center"><div style="font-size:22px;font-weight:900">7.0</div><div style="font-size:11px;color:var(--g400)">Best Band Score</div></div>
+          <div class="card" style="padding:16px;text-align:center"><div style="font-size:22px;font-weight:900">6.5</div><div style="font-size:11px;color:var(--g400)">Average Score</div></div>
+        </div>
+        <div class="exam-row"><div class="exam-dot" style="background:#F59E0B"></div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span style="font-size:13px;font-weight:700">Full IELTS Mock Test #4</span><span class="bdg bdg-red">Academic</span></div><div style="font-size:11px;color:var(--g400)">Mar 30, 2025 · Upcoming</div></div><button style="padding:7px 16px;border-radius:10px;background:linear-gradient(135deg,#1E2A5E,#2d3d82);color:#fff;font-size:11px;font-weight:700">Scheduled</button></div>
+        <div class="exam-row"><div class="exam-dot" style="background:#3B82F6"></div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span style="font-size:13px;font-weight:700">Listening Practice Test 5</span><span class="bdg bdg-blue">Component</span></div><div style="font-size:11px;color:var(--g400)">Mar 28, 2025 · Available</div></div><button style="padding:7px 16px;border-radius:10px;background:linear-gradient(135deg,#1E2A5E,#2d3d82);color:#fff;font-size:11px;font-weight:700">Start</button></div>
+        <div class="exam-row"><div class="exam-dot" style="background:#10B981"></div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span style="font-size:13px;font-weight:700">Full IELTS Mock Test #3</span><span class="bdg bdg-red">Academic</span></div><div style="font-size:11px;color:var(--g400)">Mar 20, 2025 · Completed</div></div><div style="font-size:16px;font-weight:900;color:#1E2A5E;margin-right:12px">6.5</div><button style="padding:7px 16px;border-radius:10px;background:var(--g100);color:var(--g600);font-size:11px;font-weight:700">Review</button></div>
+        <div class="exam-row"><div class="exam-dot" style="background:#10B981"></div><div style="flex:1"><div style="display:flex;align-items:center;gap:8px;margin-bottom:3px"><span style="font-size:13px;font-weight:700">Writing Task 2 Timed Test</span><span class="bdg bdg-blue">Component</span></div><div style="font-size:11px;color:var(--g400)">Mar 15, 2025 · Completed</div></div><div style="font-size:16px;font-weight:900;color:#1E2A5E;margin-right:12px">6.0</div><button style="padding:7px 16px;border-radius:10px;background:var(--g100);color:var(--g600);font-size:11px;font-weight:700">Review</button></div>
+      </div>
+
+      <!-- ── COMMUNITY ── -->
+      <div id="pg-community" class="page">
+        <div class="topbar"><div><div class="tb-title">Community</div><div class="tb-sub">Learn together, grow together.</div></div></div>
+        <div style="display:grid;grid-template-columns:1fr 280px;gap:14px">
+          <div>
+            <div class="card no-hover" style="padding:14px;margin-bottom:10px">
+              <div style="display:flex;gap:10px;align-items:center">
+                <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#ef9a9a,var(--red));color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">P</div>
+                <input style="flex:1;padding:9px 13px;border-radius:11px;border:1.5px solid var(--g200);font-size:12px;color:var(--g900);background:var(--g50)" placeholder="Share your IELTS journey, tips, or questions...">
+              </div>
+            </div>
+            <div class="card post-card"><div class="post-hd"><div class="post-av">👨‍💼</div><div><div class="post-name">Tran Minh Duc <span class="bdg bdg-amber" style="margin-left:4px">Band 7+</span></div></div><div class="post-time">2h ago</div></div><div class="post-body">Just hit Band 7.5 in Speaking! The AI Coach sessions really helped me think on my feet. Highly recommend doing 1 session every day!</div><div class="post-actions"><div class="post-act" onclick="likePost(this)">❤️ <span>24</span></div><div class="post-act">💬 Reply</div></div></div>
+            <div class="card post-card"><div class="post-hd"><div class="post-av">🧑‍🎓</div><div><div class="post-name">Nguyen Thi Lan</div></div><div class="post-time">4h ago</div></div><div class="post-body">Anyone else struggling with Task 1 graphs? I found that describing the overall trend first made a huge difference in my score!</div><div class="post-actions"><div class="post-act" onclick="likePost(this)">❤️ <span>18</span></div><div class="post-act">💬 Reply</div></div></div>
+            <div class="card post-card"><div class="post-hd"><div class="post-av">👨‍💻</div><div><div class="post-name">Hoang Nam <span class="bdg bdg-red" style="margin-left:4px">Streak 30</span></div></div><div class="post-time">Yesterday</div></div><div class="post-body">Sharing my vocab strategy: 10 new words every morning, then use them in a short paragraph before bed. 30-day streak achieved! 🔥</div><div class="post-actions"><div class="post-act" onclick="likePost(this)">❤️ <span>45</span></div><div class="post-act">💬 Reply</div></div></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div class="card no-hover" style="padding:16px">
+              <div style="font-size:12px;font-weight:700;margin-bottom:12px">🏆 Top Students This Month</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--g100)"><span style="font-size:11px;color:var(--g400);width:14px">1</span><span style="font-size:18px">👨‍💼</span><span style="font-size:12px;font-weight:500;flex:1">Minh Duc</span><span class="bdg bdg-amber">Band 7.5</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--g100)"><span style="font-size:11px;color:var(--g400);width:14px">2</span><span style="font-size:18px">🧑‍🎓</span><span style="font-size:12px;font-weight:500;flex:1">Thi Lan</span><span class="bdg bdg-blue">Band 7.0</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:8px 0"><span style="font-size:11px;color:var(--g400);width:14px">3</span><span style="font-size:18px">👩‍💻</span><span style="font-size:12px;font-weight:500;flex:1">Phuong Anh</span><span class="bdg bdg-blue">Band 6.5</span></div>
+            </div>
+            <div class="card no-hover" style="padding:16px">
+              <div style="font-size:12px;font-weight:700;margin-bottom:12px">📅 Upcoming Events</div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--g100)"><div style="width:32px;height:32px;border-radius:8px;background:#EFF6FF;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:9px;font-weight:700;color:#1E2A5E">MAR</span><span style="font-size:12px;font-weight:900;color:#1E2A5E">31</span></div><span style="font-size:11px;color:var(--g600)">Group Speaking Session</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--g100)"><div style="width:32px;height:32px;border-radius:8px;background:#FEF2F2;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:9px;font-weight:700;color:var(--red)">APR</span><span style="font-size:12px;font-weight:900;color:var(--red)">3</span></div><span style="font-size:11px;color:var(--g600)">Writing Workshop</span></div>
+              <div style="display:flex;align-items:center;gap:8px;padding:7px 0"><div style="width:32px;height:32px;border-radius:8px;background:#FFFBEB;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0"><span style="font-size:9px;font-weight:700;color:#D97706">APR</span><span style="font-size:12px;font-weight:900;color:#D97706">7</span></div><span style="font-size:11px;color:var(--g600)">Mock Test Day</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main-inner -->
+  </div><!-- /main-wrap -->
+</div><!-- /app -->
+
+<script>
+// ═══════════════════════════════════════════
+// STATE & DATA
+// ═══════════════════════════════════════════
+const TASKS = [
+  {id:1,text:'Vocab Mastery Quiz – Business Vocabulary',done:true,urgent:false},
+  {id:2,text:'Submit Essay draft for AI feedback',done:false,urgent:true},
+  {id:3,text:'Complete IELTS Listening Module 4',done:false,urgent:true},
+  {id:4,text:'AI Speaking Coach session on Workplace',done:true,urgent:false},
+  {id:5,text:'Review "IELTS Writing Task 1" Guide',done:true,urgent:false},
+];
+
+const MODULES = {
+  listening:[
+    {title:'Academic Lecture – Climate Change',level:'Band 6-7',dur:'18 min',prog:100},
+    {title:'Conversation – University Life',level:'Band 5-6',dur:'12 min',prog:65},
+    {title:'News Broadcast – Technology',level:'Band 7-8',dur:'22 min',prog:0},
+  ],
+  reading:[
+    {title:'The Future of Remote Work',level:'Band 6-7',dur:'20 min',prog:80},
+    {title:'Scientific Discovery – AI in Medicine',level:'Band 7-8',dur:'25 min',prog:30},
+    {title:'Cultural Perspectives on Education',level:'Band 5-6',dur:'15 min',prog:0},
+  ],
+  writing:[
+    {title:'Task 1 – Bar Chart Analysis',level:'Band 6+',dur:'40 min',prog:100},
+    {title:'Task 2 – Opinion Essay',level:'Band 6+',dur:'60 min',prog:50},
+    {title:'Task 2 – Discussion Essay',level:'Band 7+',dur:'60 min',prog:0},
+  ],
+  speaking:[
+    {title:'Part 1 – Personal Topics Simulation',level:'Band 5-6',dur:'10 min',prog:100},
+    {title:'Part 2 – Long Turn Cue Card',level:'Band 6-7',dur:'15 min',prog:70},
+    {title:'Part 3 – Abstract Discussion',level:'Band 7+',dur:'20 min',prog:0},
+  ],
+};
+
+const SKILL_COLORS = {listening:'#1E2A5E',reading:'#2563EB',writing:'#E53935',speaking:'#F59E0B'};
+const SKILL_ICONS = {listening:'🎧',reading:'📖',writing:'✍️',speaking:'🎙️'};
+
+const PROMPTS = [
+  'Correct my essay about climate change',
+  'Simulate an IELTS Speaking Part 2',
+  "Explain 'affect' vs 'effect'",
+  "5 advanced synonyms for 'important'",
+  'Analyze my writing band score',
+];
+
+const AI_REPLIES = [
+  "Great question! Here's what you need to know for IELTS:\n\n✅ Focus on **academic vocabulary** and avoid informal expressions.\n\n💡 **Pro tip:** Examiners look for a range of grammatical structures. Try mixing simple, compound, and complex sentences.\n\nYou're making excellent progress toward Band 7.0! 🎯",
+  "Excellent! For this topic in IELTS, here are my personalized recommendations:\n\n1️⃣ Use **topic sentences** to introduce each paragraph clearly.\n2️⃣ Support every claim with a specific example.\n3️⃣ Vary your **linking phrases** — don't overuse 'Furthermore' and 'Moreover'.\n\nWould you like me to check a specific paragraph? 📝",
+  "I've analyzed your request! Here's targeted feedback:\n\n🔍 **Strengths:** Clear argument structure and good vocabulary range.\n\n⚠️ **Areas to improve:** Watch for subject-verb agreement and article usage (a/an/the).\n\nKeep practicing — consistency is key to Band 7+ ! 💪",
+];
+
+let chatMsgs = [
+  {role:'ai',text:"Hi there! I'm your CLC AI Tutor. I can help you correct essays, simulate speaking tests, explain grammar, or build vocabulary. What would you like to work on today?"},
+  {role:'user',text:"Can you check this sentence: 'The number of people which use social media have increased rapidly.'"},
+  {role:'ai',text:"Great question! Here's the corrected version:\n\n✅ 'The number of people **who** use social media **has** increased rapidly.'\n\nTwo fixes:\n1. Use **'who'** (not 'which') for people.\n2. 'The number of...' takes a **singular verb** ('has', not 'have').\n\nThis is a common IELTS Writing mistake — fixing it alone can boost your grammatical range score! 🎯"},
+];
+
+let currentSkill = 'listening';
+let sidebarCollapsed = false;
+let replyIdx = 0;
+
+// ═══════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════
+function enterApp(){
+  document.getElementById('landing').style.display='none';
+  const app=document.getElementById('app');
+  app.style.display='flex';
+  renderTasks();
+  renderModules();
+  renderChat();
+  renderPrompts();
+}
+
+function showPage(name){
+  document.querySelectorAll('#app .page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pg-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>{
+    b.classList.remove('active');
+    const dot=b.querySelector('.nav-dot');
+    if(dot)dot.remove();
+  });
+  const nb=document.getElementById('nb-'+name);
+  if(nb){
+    nb.classList.add('active');
+    const dot=document.createElement('div');
+    dot.className='nav-dot';
+    nb.appendChild(dot);
+  }
+}
+
+function toggleSidebar(){
+  sidebarCollapsed=!sidebarCollapsed;
+  const sb=document.getElementById('sidebar');
+  sb.classList.toggle('collapsed',sidebarCollapsed);
+  sb.querySelectorAll('.sb-text,.sb-pname,.sb-psub,span').forEach(el=>{
+    el.style.opacity=sidebarCollapsed?'0':'1';
+    el.style.transition='opacity .2s';
+  });
+}
+
+// ═══════════════════════════════════════════
+// TASKS
+// ═══════════════════════════════════════════
+function renderTasks(){
+  const c=document.getElementById('task-list');
+  if(!c)return;
+  c.innerHTML=TASKS.map((t,i)=>`
+    <div class="ti" onclick="toggleTask(${i})">
+      <div class="tc ${t.done?'done':''}">${t.done?'✓':''}</div>
+      <span class="tt ${t.done?'done':''}">${t.text}</span>
+      ${t.urgent&&!t.done?'<span class="bdg bdg-red">URGENT</span>':''}
+      ${t.done?'<span class="bdg bdg-green">Done</span>':''}
+    </div>
+  `).join('');
+}
+
+function toggleTask(i){
+  TASKS[i].done=!TASKS[i].done;
+  renderTasks();
+}
+
+// ═══════════════════════════════════════════
+// PRACTICE LAB
+// ═══════════════════════════════════════════
+function switchSkill(skill){
+  currentSkill=skill;
+  const colors={listening:'#1E2A5E',reading:'#2563EB',writing:'#E53935',speaking:'#F59E0B'};
+  document.querySelectorAll('.stab').forEach(t=>{
+    t.classList.remove('active');
+    t.style.background='';
+    t.style.color='';
+  });
+  const tab=document.getElementById('stab-'+skill);
+  tab.classList.add('active');
+  tab.style.background=`linear-gradient(135deg,${colors[skill]},${colors[skill]}cc)`;
+  tab.style.color='#fff';
+  renderModules();
+}
+
+function renderModules(){
+  const c=document.getElementById('module-list');
+  if(!c)return;
+  const mods=MODULES[currentSkill]||[];
+  const col=SKILL_COLORS[currentSkill];
+  const ico=SKILL_ICONS[currentSkill];
+  c.innerHTML=mods.map(m=>{
+    const btnLabel=m.prog===100?'Review':m.prog>0?'Continue':'Start';
+    const btnBg=m.prog===100?'background:#ECFDF5;color:#059669':'background:'+col;
+    return `
+    <div class="mc">
+      <div class="mc-ico" style="background:${col}18">${ico}</div>
+      <div style="flex:1">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+          <div class="mc-ttl">${m.title}</div>
+          <span class="bdg bdg-blue">${m.level}</span>
+        </div>
+        <div class="mc-meta">⏱ ${m.dur} &nbsp;·&nbsp; ${m.prog===100?'✅ Completed':m.prog>0?m.prog+'% done':'Not started'}</div>
+        <div class="pt" style="height:5px"><div class="pf" style="width:${m.prog}%;background:${m.prog===100?'#10B981':col}"></div></div>
+      </div>
+      <button class="mc-btn" style="${btnBg}">${btnLabel}</button>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════
+function renderChat(){
+  const c=document.getElementById('chat-msgs');
+  if(!c)return;
+  c.innerHTML=chatMsgs.map(m=>`
+    <div class="msg-row ${m.role==='user'?'user':''}">
+      <div class="msg-av ${m.role==='ai'?'ai-a':'usr-a'}">${m.role==='ai'?'AI':'P'}</div>
+      <div class="msg-bub ${m.role==='ai'?'ai-b':'usr-b'}">${m.text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>')}</div>
+    </div>
+  `).join('');
+  c.scrollTop=c.scrollHeight;
+}
+
+function renderPrompts(){
+  const c=document.getElementById('prompt-list');
+  if(!c)return;
+  c.innerHTML=PROMPTS.map(p=>`
+    <button onclick="sendPrompt('${p.replace(/'/g,"\\'")}') " style="padding:8px 10px;border-radius:10px;background:var(--g50);border:1.5px solid var(--g100);font-size:11px;color:var(--g600);text-align:left;transition:all .2s;cursor:pointer" onmouseover="this.style.background='#EFF6FF';this.style.color='#1D4ED8';this.style.borderColor='#BFDBFE'" onmouseout="this.style.background='var(--g50)';this.style.color='var(--g600)';this.style.borderColor='var(--g100)'">${p}</button>
+  `).join('');
+}
+
+function sendPrompt(text){
+  document.getElementById('chat-input').value=text;
+  sendMsg();
+}
+
+function sendMsg(){
+  const inp=document.getElementById('chat-input');
+  const text=inp.value.trim();
+  if(!text)return;
+  chatMsgs.push({role:'user',text});
+  inp.value='';
+  renderChat();
+  // Typing indicator
+  const c=document.getElementById('chat-msgs');
+  const typing=document.createElement('div');
+  typing.className='msg-row';
+  typing.id='typing-ind';
+  typing.innerHTML=`<div class="msg-av ai-a">AI</div><div class="msg-bub ai-b"><div class="typing"><span></span><span></span><span></span></div></div>`;
+  c.appendChild(typing);
+  c.scrollTop=c.scrollHeight;
+  setTimeout(()=>{
+    const t=document.getElementById('typing-ind');
+    if(t)t.remove();
+    chatMsgs.push({role:'ai',text:AI_REPLIES[replyIdx%AI_REPLIES.length]});
+    replyIdx++;
+    renderChat();
+  },1400);
+}
+
+// ═══════════════════════════════════════════
+// COMMUNITY
+// ═══════════════════════════════════════════
+function likePost(btn){
+  const span=btn.querySelector('span');
+  const n=parseInt(span.textContent)+1;
+  span.textContent=n;
+  btn.style.color='#E53935';
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  // show landing
+});
+</script>
+</body>
+</html>
