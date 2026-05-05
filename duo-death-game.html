@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>☠️ DuoLingo: The Death of Duo</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Creepster&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #58cc02;
+    --green-dark: #3e9a00;
+    --red: #ff4b4b;
+    --red-dark: #cc0000;
+    --ghost: #a855f7;
+    --ghost-dark: #7e22ce;
+    --bg: #1a0a2e;
+    --card: #2d1b4e;
+    --card2: #3d2060;
+    --text: #f0e6ff;
+    --muted: #c4a8e8;
+    --gold: #ffd700;
+    --border: rgba(168,85,247,0.3);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Floating ghost particles */
+  .particle {
+    position: fixed;
+    font-size: 20px;
+    opacity: 0;
+    pointer-events: none;
+    animation: floatUp 4s ease-in forwards;
+    z-index: 0;
+  }
+  @keyframes floatUp {
+    0% { opacity: 0.7; transform: translateY(0) rotate(0deg); }
+    100% { opacity: 0; transform: translateY(-200px) rotate(20deg); }
+  }
+
+  /* Screens */
+  .screen { display: none; min-height: 100vh; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+
+  /* ===== EDITOR SCREEN ===== */
+  #editor-screen {
+    background: radial-gradient(ellipse at top, #2d1b4e 0%, #1a0a2e 70%);
+  }
+  .editor-container {
+    width: 100%;
+    max-width: 900px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px;
+  }
+  .editor-title {
+    font-family: 'Creepster', cursive;
+    font-size: 2rem;
+    color: var(--ghost);
+    text-align: center;
+    margin-bottom: 6px;
+    text-shadow: 0 0 20px rgba(168,85,247,0.5);
+  }
+  .editor-subtitle { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+
+  .editor-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .tab-btn {
+    padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer;
+    font-family: 'Nunito', sans-serif; font-size: 0.85rem; font-weight: 700;
+    transition: all 0.2s;
+  }
+  .tab-btn.active { background: var(--ghost); color: white; border-color: var(--ghost); }
+  .tab-btn:hover:not(.active) { background: rgba(168,85,247,0.1); color: var(--text); }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  .form-group { margin-bottom: 16px; }
+  .form-group label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; font-weight: 700; }
+  .form-group input, .form-group textarea, .form-group select {
+    width: 100%; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--bg);
+    color: var(--text); font-family: 'Nunito', sans-serif; font-size: 0.9rem;
+  }
+  .form-group textarea { min-height: 70px; resize: vertical; }
+  .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    outline: none; border-color: var(--ghost);
+  }
+
+  .question-item {
+    background: var(--card2); border-radius: 12px; padding: 16px;
+    margin-bottom: 12px; border: 1px solid var(--border); position: relative;
+  }
+  .question-item .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .question-item .q-num { font-size: 0.8rem; color: var(--ghost); font-weight: 800; }
+  .q-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choice-row { display: flex; align-items: center; gap: 8px; }
+  .choice-row input[type=radio] { accent-color: var(--ghost); width: 16px; height: 16px; flex-shrink: 0; }
+  .choice-row input[type=text] { flex: 1; }
+  .choice-row label { font-size: 0.75rem; color: var(--muted); white-space: nowrap; }
+
+  .btn {
+    padding: 12px 24px; border-radius: 14px; font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 1rem; cursor: pointer; border: none;
+    transition: all 0.15s; display: inline-flex; align-items: center; gap: 8px;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn-ghost { background: var(--ghost); color: white; box-shadow: 0 4px 0 var(--ghost-dark); }
+  .btn-ghost:hover { background: #bf7af7; }
+  .btn-ghost:active { box-shadow: none; transform: translateY(4px); }
+  .btn-green { background: var(--green); color: white; box-shadow: 0 4px 0 var(--green-dark); }
+  .btn-green:hover { background: #67e002; }
+  .btn-green:active { box-shadow: none; transform: translateY(4px); }
+  .btn-red { background: var(--red); color: white; box-shadow: 0 4px 0 var(--red-dark); }
+  .btn-danger { background: transparent; border: 1px solid var(--red); color: var(--red); font-size: 0.8rem; padding: 6px 12px; border-radius: 8px; }
+  .btn-danger:hover { background: rgba(255,75,75,0.1); }
+  .btn-sm { padding: 7px 14px; font-size: 0.85rem; }
+  .btn-outline { background: transparent; border: 2px solid var(--border); color: var(--muted); }
+  .btn-outline:hover { border-color: var(--ghost); color: var(--ghost); }
+
+  .icon-preview { font-size: 2rem; display: inline-block; }
+  .icon-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+  .icon-opt {
+    font-size: 1.5rem; padding: 8px; border-radius: 10px; cursor: pointer;
+    border: 2px solid transparent; background: var(--bg); transition: all 0.15s;
+  }
+  .icon-opt:hover, .icon-opt.selected { border-color: var(--ghost); background: rgba(168,85,247,0.2); }
+
+  /* XP bar */
+  .xp-config { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+  .editor-actions { display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end; flex-wrap: wrap; }
+
+  /* ===== GAME SCREEN ===== */
+  #game-screen {
+    background: radial-gradient(ellipse at top, #1a0a2e 0%, #0d0520 100%);
+    padding: 0;
+    justify-content: flex-start;
+  }
+  .game-inner {
+    width: 100%; max-width: 640px; margin: 0 auto;
+    padding: 20px 20px 100px;
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+
+  /* Top bar */
+  .top-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .close-btn {
+    background: none; border: none; color: var(--muted); cursor: pointer;
+    font-size: 1.3rem; padding: 4px; border-radius: 8px; transition: color 0.2s;
+  }
+  .close-btn:hover { color: var(--text); }
+  .progress-bar-wrap { flex: 1; height: 16px; background: var(--card2); border-radius: 100px; overflow: hidden; }
+  .progress-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--ghost), #e879f9);
+    border-radius: 100px; transition: width 0.5s ease;
+  }
+  .hearts { display: flex; gap: 4px; align-items: center; font-size: 0.85rem; font-weight: 800; }
+  .heart-icon { font-size: 1.2rem; transition: all 0.3s; }
+  .heart-icon.lost { filter: grayscale(1); opacity: 0.3; }
+
+  /* XP display */
+  .xp-display {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    margin-bottom: 20px;
+  }
+  .xp-bar-wrap {
+    flex: 1; height: 22px; background: var(--card2); border-radius: 100px;
+    overflow: hidden; position: relative; border: 1px solid var(--border);
+  }
+  .xp-bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--green), #86efac);
+    border-radius: 100px; transition: width 0.6s ease;
+  }
+  .xp-label {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    font-size: 0.75rem; font-weight: 800; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+    white-space: nowrap;
+  }
+  .xp-badge {
+    background: var(--gold); color: #1a0a2e; font-weight: 900; font-size: 0.75rem;
+    padding: 4px 10px; border-radius: 100px; white-space: nowrap;
+  }
+
+  /* Duo character */
+  .duo-area { text-align: center; margin-bottom: 20px; position: relative; }
+  .duo-char {
+    font-size: 5rem; display: inline-block;
+    filter: drop-shadow(0 0 20px rgba(168,85,247,0.6));
+    transition: transform 0.3s, filter 0.3s;
+  }
+  .duo-char.shake {
+    animation: charShake 0.5s ease;
+  }
+  .duo-char.happy { filter: drop-shadow(0 0 20px rgba(88,204,2,0.7)); }
+  .duo-char.angry { filter: drop-shadow(0 0 20px rgba(255,75,75,0.7)); }
+  @keyframes charShake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-8px) rotate(-5deg); }
+    40% { transform: translateX(8px) rotate(5deg); }
+    60% { transform: translateX(-5px) rotate(-3deg); }
+    80% { transform: translateX(5px) rotate(3deg); }
+  }
+  .duo-speech {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 12px 18px; margin: 10px auto 0;
+    max-width: 420px; font-size: 0.9rem; color: var(--muted);
+    position: relative; line-height: 1.5;
+  }
+  .duo-speech::before {
+    content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+    border: 5px solid transparent; border-bottom-color: var(--border);
+  }
+
+  /* Question */
+  .question-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 18px;
+    padding: 24px; margin-bottom: 20px; text-align: center;
+  }
+  .question-type { font-size: 0.75rem; color: var(--ghost); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .question-text { font-size: 1.2rem; font-weight: 800; line-height: 1.4; }
+
+  /* Choices */
+  .choices-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .choice-btn {
+    background: var(--card); border: 2px solid var(--border);
+    border-radius: 14px; padding: 14px 16px; font-family: 'Nunito', sans-serif;
+    font-weight: 700; font-size: 0.95rem; color: var(--text);
+    cursor: pointer; transition: all 0.15s; text-align: center; line-height: 1.3;
+  }
+  .choice-btn:hover:not(:disabled) { border-color: var(--ghost); background: rgba(168,85,247,0.15); transform: translateY(-2px); }
+  .choice-btn.correct { background: rgba(88,204,2,0.2); border-color: var(--green); color: #86efac; }
+  .choice-btn.wrong { background: rgba(255,75,75,0.2); border-color: var(--red); color: #fca5a5; animation: btnShake 0.4s ease; }
+  @keyframes btnShake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+  }
+  .choice-btn:disabled { cursor: default; }
+
+  /* Feedback banner */
+  .feedback-banner {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    padding: 20px; display: none;
+    flex-direction: column; align-items: center; gap: 12px;
+    z-index: 10;
+  }
+  .feedback-banner.correct { background: linear-gradient(0deg, rgba(88,204,2,0.15) 0%, transparent 100%); display: flex; }
+  .feedback-banner.wrong { background: linear-gradient(0deg, rgba(255,75,75,0.12) 0%, transparent 100%); display: flex; }
+  .feedback-inner {
+    width: 100%; max-width: 640px; display: flex; align-items: center;
+    justify-content: space-between; gap: 16px;
+  }
+  .feedback-text { font-size: 1rem; font-weight: 800; }
+  .feedback-sub { font-size: 0.8rem; font-weight: 400; margin-top: 2px; color: var(--muted); }
+  .feedback-banner.correct .feedback-text { color: var(--green); }
+  .feedback-banner.wrong .feedback-text { color: var(--red); }
+  .continue-btn {
+    padding: 14px 28px; border-radius: 14px; font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 1rem; cursor: pointer; border: none;
+    white-space: nowrap;
+  }
+  .feedback-banner.correct .continue-btn { background: var(--green); color: white; box-shadow: 0 4px 0 var(--green-dark); }
+  .feedback-banner.wrong .continue-btn { background: var(--red); color: white; box-shadow: 0 4px 0 var(--red-dark); }
+
+  /* XP popup */
+  .xp-popup {
+    position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+    font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1.5rem;
+    pointer-events: none; z-index: 100;
+    animation: xpFloat 1.5s ease forwards;
+  }
+  .xp-popup.gain { color: var(--green); }
+  .xp-popup.loss { color: var(--red); }
+  @keyframes xpFloat {
+    0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-60px); }
+  }
+
+  /* ===== DEATH SCREEN ===== */
+  #death-screen {
+    background: radial-gradient(ellipse at center, #3b0000 0%, #0d0000 100%);
+    text-align: center;
+  }
+  .death-duo { font-size: 8rem; margin-bottom: 10px; filter: grayscale(1); animation: deathPulse 2s ease-in-out infinite; }
+  @keyframes deathPulse {
+    0%,100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.05); }
+  }
+  .death-title { font-family: 'Creepster', cursive; font-size: 3rem; color: var(--red); text-shadow: 0 0 30px rgba(255,0,0,0.5); margin-bottom: 8px; }
+  .death-msg { color: #fca5a5; margin-bottom: 30px; font-size: 1rem; max-width: 320px; line-height: 1.6; }
+  .death-stats { display: flex; gap: 20px; justify-content: center; margin-bottom: 30px; }
+  .stat-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 16px 24px; }
+  .stat-val { font-size: 2rem; font-weight: 900; color: var(--gold); }
+  .stat-label { font-size: 0.75rem; color: #fca5a5; }
+
+  /* ===== WIN SCREEN ===== */
+  #win-screen {
+    background: radial-gradient(ellipse at center, #0d2b00 0%, #0d0520 100%);
+    text-align: center;
+  }
+  .win-duo { font-size: 7rem; margin-bottom: 10px; animation: winBounce 0.6s ease infinite alternate; }
+  @keyframes winBounce { from { transform: translateY(0); } to { transform: translateY(-15px); } }
+  .win-title { font-family: 'Creepster', cursive; font-size: 2.5rem; color: var(--green); text-shadow: 0 0 30px rgba(88,204,2,0.5); margin-bottom: 8px; }
+  .win-msg { color: #86efac; margin-bottom: 30px; font-size: 1rem; max-width: 320px; line-height: 1.6; }
+  .confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+
+  /* ===== TITLE SCREEN ===== */
+  #title-screen {
+    background: radial-gradient(ellipse at top, #2d1b4e 0%, #1a0a2e 70%);
+    text-align: center;
+  }
+  .title-duo { font-size: 7rem; display: block; margin-bottom: 10px; animation: titleFloat 3s ease-in-out infinite; filter: drop-shadow(0 0 30px rgba(168,85,247,0.7)); }
+  @keyframes titleFloat {
+    0%,100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-15px) rotate(3deg); }
+  }
+  .title-main { font-family: 'Creepster', cursive; font-size: 3rem; color: var(--text); margin-bottom: 4px; }
+  .title-sub { font-family: 'Creepster', cursive; font-size: 1.6rem; color: var(--ghost); text-shadow: 0 0 20px rgba(168,85,247,0.5); margin-bottom: 8px; }
+  .title-desc { color: var(--muted); font-size: 0.9rem; max-width: 360px; line-height: 1.5; margin: 0 auto 30px; }
+  .title-btns { display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px; margin: 0 auto; }
+
+  /* Floating skulls bg */
+  .bg-skulls {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; overflow: hidden; z-index: 0;
+  }
+  .bg-skull { position: absolute; font-size: 1.5rem; opacity: 0.04; animation: bgFloat linear infinite; }
+  @keyframes bgFloat {
+    from { transform: translateY(100vh) rotate(0deg); }
+    to { transform: translateY(-100px) rotate(360deg); }
+  }
+
+  .sound-toggle {
+    position: fixed; top: 16px; right: 16px; background: var(--card);
+    border: 1px solid var(--border); border-radius: 50%; width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    font-size: 1.1rem; z-index: 50; transition: all 0.2s;
+  }
+  .sound-toggle:hover { border-color: var(--ghost); }
+
+  /* Responsive */
+  @media (max-width: 480px) {
+    .choices-grid { grid-template-columns: 1fr; }
+    .q-grid { grid-template-columns: 1fr; }
+    .xp-config { grid-template-columns: 1fr; }
+    .death-stats { flex-direction: column; align-items: center; }
+  }
+  .separator { height: 1px; background: var(--border); margin: 20px 0; }
+  .add-q-btn { width: 100%; padding: 12px; border-radius: 12px; background: transparent; border: 2px dashed var(--border); color: var(--ghost); font-family: 'Nunito', sans-serif; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.9rem; }
+  .add-q-btn:hover { border-color: var(--ghost); background: rgba(168,85,247,0.1); }
+
+  .streak-fire { font-size: 0.9rem; }
+</style>
+</head>
+<body>
+
+<!-- Background decoration -->
+<div class="bg-skulls" id="bgSkulls"></div>
+
+<!-- Sound Toggle -->
+<div class="sound-toggle" id="soundToggle" title="Bật/tắt âm thanh">🔊</div>
+
+<!-- ===== TITLE SCREEN ===== -->
+<div class="screen active" id="title-screen">
+  <span class="title-duo" id="titleDuo">👻</span>
+  <h1 class="title-main">DuoLingo</h1>
+  <h2 class="title-sub">☠️ The Death of Duo ☠️</h2>
+  <p class="title-desc">Duo đã chết. Nhưng hồn ma của hắn vẫn theo dõi bạn. Học đúng để giải phóng linh hồn, học sai và bạn sẽ chết cùng Duo...</p>
+  <div class="title-btns">
+    <button class="btn btn-ghost" onclick="startGame()">💀 Bắt đầu học (và chết)</button>
+    <button class="btn btn-outline" onclick="showEditor()">⚙️ Chỉnh sửa trò chơi</button>
+  </div>
+</div>
+
+<!-- ===== EDITOR SCREEN ===== -->
+<div class="screen" id="editor-screen">
+  <div class="editor-container">
+    <h2 class="editor-title">⚙️ Chỉnh sửa trò chơi</h2>
+    <p class="editor-subtitle">Tùy chỉnh mọi thứ theo ý muốn của bạn</p>
+
+    <div class="editor-tabs">
+      <button class="tab-btn active" onclick="switchTab('tab-icon')">🎭 Biểu tượng</button>
+      <button class="tab-btn" onclick="switchTab('tab-xp')">⚡ XP & Luật chơi</button>
+      <button class="tab-btn" onclick="switchTab('tab-questions')">📝 Câu hỏi</button>
+      <button class="tab-btn" onclick="switchTab('tab-sounds')">🔊 Âm thanh</button>
+    </div>
+
+    <!-- TAB: Icon -->
+    <div class="tab-panel active" id="tab-icon">
+      <div class="form-group">
+        <label>Biểu tượng Duo (hồn ma)</label>
+        <div style="display:flex; align-items:center; gap:16px; margin-bottom:12px;">
+          <span class="icon-preview" id="iconPreview">👻</span>
+          <div>
+            <p style="font-size:0.8rem;color:var(--muted);">Hoặc nhập emoji tùy chỉnh:</p>
+            <input type="text" id="customIconInput" placeholder="Nhập emoji..." style="width:120px;" oninput="updateIconPreview(this.value)">
+          </div>
+        </div>
+        <p style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;">Chọn từ bộ sưu tập:</p>
+        <div class="icon-grid" id="iconGrid"></div>
+      </div>
+      <div class="form-group" style="margin-top:16px;">
+        <label>Tên nhân vật</label>
+        <input type="text" id="charName" value="Duo" placeholder="Tên nhân vật...">
+      </div>
+      <div class="form-group">
+        <label>Lời thoại khi đúng (cách nhau bằng | )</label>
+        <textarea id="correctSpeeches" placeholder="Xuất sắc lắm!|Đúng rồi đó!|Tuyệt vời!">Xuất sắc lắm!|Linh hồn ta mỉm cười...|Đúng rồi, ta tha thứ cho ngươi!|Không tệ đối với kẻ còn sống!</textarea>
+      </div>
+      <div class="form-group">
+        <label>Lời thoại khi sai (cách nhau bằng | )</label>
+        <textarea id="wrongSpeeches" placeholder="Sai rồi!|Cố lên!">KHÓC THÉT! SAI RỒI!|Ngươi muốn chết cùng ta à?|Ta sẽ ám ảnh ngươi mãi mãi...|Sai! Xuống âm phủ đi!</textarea>
+      </div>
+    </div>
+
+    <!-- TAB: XP -->
+    <div class="tab-panel" id="tab-xp">
+      <div class="xp-config">
+        <div class="form-group">
+          <label>XP tối đa</label>
+          <input type="number" id="cfgMaxXP" value="100" min="50" max="500">
+        </div>
+        <div class="form-group">
+          <label>XP khi đúng (+)</label>
+          <input type="number" id="cfgXPGain" value="10" min="1" max="100">
+        </div>
+        <div class="form-group">
+          <label>XP khi sai (-)</label>
+          <input type="number" id="cfgXPLoss" value="15" min="1" max="100">
+        </div>
+      </div>
+      <div class="xp-config">
+        <div class="form-group">
+          <label>Số tim ban đầu</label>
+          <input type="number" id="cfgHearts" value="3" min="1" max="10">
+        </div>
+        <div class="form-group">
+          <label>Mất tim khi sai bao nhiêu lần?</label>
+          <input type="number" id="cfgWrongToHeart" value="2" min="1" max="5">
+        </div>
+        <div class="form-group">
+          <label>Câu cần đúng để thắng</label>
+          <input type="number" id="cfgWinCount" value="5" min="1" max="20">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Tiêu đề màn chết</label>
+        <input type="text" id="cfgDeathTitle" value="Bạn đã chết!" placeholder="Tiêu đề...">
+      </div>
+      <div class="form-group">
+        <label>Thông điệp màn chết</label>
+        <textarea id="cfgDeathMsg">Duo đã kéo bạn xuống âm phủ. Bạn không học đủ chăm chỉ và giờ phải chịu hậu quả... Cùng Duo mãi mãi trong bóng tối.</textarea>
+      </div>
+      <div class="form-group">
+        <label>Tiêu đề màn thắng</label>
+        <input type="text" id="cfgWinTitle" value="Tự do!" placeholder="Tiêu đề...">
+      </div>
+      <div class="form-group">
+        <label>Thông điệp màn thắng</label>
+        <textarea id="cfgWinMsg">Bạn đã học đủ giỏi để giải phóng linh hồn Duo. Hắn có thể yên nghỉ... Nhưng liệu hắn có thực sự ra đi?</textarea>
+      </div>
+    </div>
+
+    <!-- TAB: Questions -->
+    <div class="tab-panel" id="tab-questions">
+      <div id="questionsList"></div>
+      <button class="add-q-btn" onclick="addQuestion()">+ Thêm câu hỏi mới</button>
+    </div>
+
+    <!-- TAB: Sounds -->
+    <div class="tab-panel" id="tab-sounds">
+      <p style="color:var(--muted);font-size:0.85rem;margin-bottom:16px;">Trò chơi sử dụng âm thanh tổng hợp qua Web Audio API. Bạn có thể bật/tắt từng loại:</p>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="sfxCorrect" checked style="accent-color:var(--ghost);width:18px;height:18px;">
+          🔔 Âm thanh đúng (tiếng chuông vui)
+        </label>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="sfxWrong" checked style="accent-color:var(--ghost);width:18px;height:18px;">
+          💀 Âm thanh sai (tiếng rùng rợn)
+        </label>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="sfxDeath" checked style="accent-color:var(--ghost);width:18px;height:18px;">
+          ☠️ Âm thanh chết (nhạc ma)
+        </label>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="sfxWin" checked style="accent-color:var(--ghost);width:18px;height:18px;">
+          🎉 Âm thanh thắng (tiếng hân hoan)
+        </label>
+      </div>
+      <div class="form-group">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <input type="checkbox" id="sfxLoseHeart" checked style="accent-color:var(--ghost);width:18px;height:18px;">
+          💔 Âm thanh mất tim
+        </label>
+      </div>
+      <div class="separator"></div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;">
+        <button class="btn btn-sm btn-ghost" onclick="testSound('correct')">▶ Test đúng</button>
+        <button class="btn btn-sm btn-ghost" onclick="testSound('wrong')">▶ Test sai</button>
+        <button class="btn btn-sm btn-ghost" onclick="testSound('death')">▶ Test chết</button>
+        <button class="btn btn-sm btn-ghost" onclick="testSound('win')">▶ Test thắng</button>
+        <button class="btn btn-sm btn-ghost" onclick="testSound('heart')">▶ Test mất tim</button>
+      </div>
+    </div>
+
+    <div class="editor-actions">
+      <button class="btn btn-outline" onclick="showTitle()">← Quay lại</button>
+      <button class="btn btn-green" onclick="saveAndStart()">▶ Lưu & Chơi ngay</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div class="screen" id="game-screen">
+  <div class="game-inner">
+    <!-- Top bar -->
+    <div class="top-bar">
+      <button class="close-btn" onclick="confirmQuit()">✕</button>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <div class="hearts" id="heartsDisplay"></div>
+    </div>
+
+    <!-- XP Bar -->
+    <div class="xp-display">
+      <span class="xp-badge" id="xpBadge">✨ 0 XP</span>
+      <div class="xp-bar-wrap">
+        <div class="xp-bar-fill" id="xpBarFill" style="width:0%"></div>
+        <div class="xp-label" id="xpLabel">0 / 100 XP</div>
+      </div>
+    </div>
+
+    <!-- Duo Character -->
+    <div class="duo-area">
+      <span class="duo-char" id="duoChar">👻</span>
+      <div class="duo-speech" id="duoSpeech">Học đi nếu không muốn chết như ta...</div>
+    </div>
+
+    <!-- Question -->
+    <div class="question-box" id="questionBox">
+      <div class="question-type" id="questionType">Câu hỏi</div>
+      <div class="question-text" id="questionText">Đang tải...</div>
+    </div>
+
+    <!-- Choices -->
+    <div class="choices-grid" id="choicesGrid"></div>
+  </div>
+
+  <!-- Feedback Banner -->
+  <div class="feedback-banner" id="feedbackBanner">
+    <div class="feedback-inner">
+      <div>
+        <div class="feedback-text" id="feedbackText">Đúng rồi!</div>
+        <div class="feedback-sub" id="feedbackSub"></div>
+      </div>
+      <button class="continue-btn" id="continueBtn" onclick="nextQuestion()">Tiếp tục →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DEATH SCREEN ===== -->
+<div class="screen" id="death-screen">
+  <div style="position:relative;z-index:1;">
+    <div class="death-duo" id="deathDuo">👻</div>
+    <h2 class="death-title" id="deathTitle">Bạn đã chết!</h2>
+    <p class="death-msg" id="deathMsg">Duo đã kéo bạn xuống âm phủ...</p>
+    <div class="death-stats">
+      <div class="stat-card"><div class="stat-val" id="deathXP">0</div><div class="stat-label">XP kiếm được</div></div>
+      <div class="stat-card"><div class="stat-val" id="deathCorrect">0</div><div class="stat-label">Câu đúng</div></div>
+      <div class="stat-card"><div class="stat-val" id="deathStreak">0</div><div class="stat-label">Streak dài nhất</div></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-red" onclick="startGame()">🔄 Thử lại</button>
+      <button class="btn btn-outline" onclick="showTitle()">🏠 Trang chủ</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== WIN SCREEN ===== -->
+<div class="screen" id="win-screen">
+  <canvas class="confetti" id="confettiCanvas"></canvas>
+  <div style="position:relative;z-index:1;">
+    <div class="win-duo" id="winDuo">👻</div>
+    <h2 class="win-title" id="winTitle">Tự do!</h2>
+    <p class="win-msg" id="winMsg">Bạn đã giải phóng linh hồn Duo...</p>
+    <div class="death-stats">
+      <div class="stat-card"><div class="stat-val" id="winXP">0</div><div class="stat-label">XP kiếm được</div></div>
+      <div class="stat-card"><div class="stat-val" id="winCorrect">0</div><div class="stat-label">Câu đúng</div></div>
+      <div class="stat-card"><div class="stat-val" id="winStreak">0</div><div class="stat-label">Streak dài nhất</div></div>
+    </div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn btn-green" onclick="startGame()">🔄 Chơi lại</button>
+      <button class="btn btn-outline" onclick="showTitle()">🏠 Trang chủ</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  AUDIO ENGINE
+// ============================================================
+let audioCtx = null;
+let soundEnabled = true;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freqs, durations, type='sine', vol=0.3) {
+  try {
+    const ctx = getAudioCtx();
+    let t = ctx.currentTime;
+    freqs.forEach((f, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = type; osc.frequency.value = f;
+      gain.gain.setValueAtTime(vol, t);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + durations[i]);
+      osc.start(t); osc.stop(t + durations[i]);
+      t += durations[i];
+    });
+  } catch(e) {}
+}
+
+function sfx(type) {
+  if (!soundEnabled) return;
+  const cfg = gameConfig.sounds;
+  if (type === 'correct' && cfg.correct) {
+    playTone([523, 659, 784], [0.1, 0.1, 0.25], 'sine', 0.25);
+  } else if (type === 'wrong' && cfg.wrong) {
+    playTone([200, 150, 100], [0.15, 0.15, 0.3], 'sawtooth', 0.2);
+  } else if (type === 'death' && cfg.death) {
+    playTone([220, 196, 174, 130], [0.3, 0.3, 0.3, 0.8], 'triangle', 0.3);
+  } else if (type === 'win' && cfg.win) {
+    playTone([523, 659, 784, 1046], [0.1, 0.1, 0.1, 0.4], 'sine', 0.25);
+  } else if (type === 'heart' && cfg.heart) {
+    playTone([440, 300], [0.2, 0.4], 'square', 0.15);
+  }
+}
+
+function testSound(type) { sfx(type); }
+
+// ============================================================
+//  DEFAULT CONFIG & DATA
+// ============================================================
+let gameConfig = {
+  icon: '👻',
+  charName: 'Duo',
+  correctSpeeches: ['Xuất sắc lắm!','Linh hồn ta mỉm cười...','Đúng rồi, ta tha thứ cho ngươi!','Không tệ đối với kẻ còn sống!'],
+  wrongSpeeches: ['KHÓC THÉT! SAI RỒI!','Ngươi muốn chết cùng ta à?','Ta sẽ ám ảnh ngươi mãi mãi...','Sai! Xuống âm phủ đi!'],
+  maxXP: 100, xpGain: 10, xpLoss: 15,
+  hearts: 3, wrongToHeart: 2, winCount: 5,
+  deathTitle: 'Bạn đã chết!', deathMsg: 'Duo đã kéo bạn xuống âm phủ. Bạn không học đủ chăm chỉ và giờ phải chịu hậu quả... Cùng Duo mãi mãi trong bóng tối.',
+  winTitle: 'Tự do!', winMsg: 'Bạn đã học đủ giỏi để giải phóng linh hồn Duo. Hắn có thể yên nghỉ... Nhưng liệu hắn có thực sự ra đi?',
+  sounds: { correct: true, wrong: true, death: true, win: true, heart: true },
+  questions: [
+    {
+      type: 'Dịch từ vựng',
+      question: '"Học" trong tiếng Anh là gì?',
+      choices: ['Study', 'Sleep', 'Die', 'Cry'],
+      correct: 0
+    },
+    {
+      type: 'Chọn đáp án',
+      question: 'Duo là con gì?',
+      choices: ['Cú mèo', 'Chim cánh cụt', 'Ếch xanh', 'Vẹt đuôi dài'],
+      correct: 0
+    },
+    {
+      type: 'Từ vựng tiếng Anh',
+      question: '"Ghost" có nghĩa là gì?',
+      choices: ['Ma / Hồn ma', 'Học sinh', 'Câu hỏi', 'Trả lời'],
+      correct: 0
+    },
+    {
+      type: 'Ngữ pháp',
+      question: 'Câu nào đúng ngữ pháp tiếng Anh?',
+      choices: ['I am learning', 'I are learning', 'I is learning', 'I were learning'],
+      correct: 0
+    },
+    {
+      type: 'Dịch câu',
+      question: '"Tôi yêu học tiếng Anh" dịch sang tiếng Anh là?',
+      choices: ['I love learning English', 'I hate studying', 'I am dead', 'English love I'],
+      correct: 0
+    },
+    {
+      type: 'Điền vào chỗ trống',
+      question: '"The cat ___ on the mat." — Điền động từ đúng:',
+      choices: ['sits', 'sit', 'sitting', 'sat'],
+      correct: 0
+    },
+    {
+      type: 'Chọn từ đúng',
+      question: '"Dead" có nghĩa là gì?',
+      choices: ['Đã chết / Chết rồi', 'Đang học', 'Vui vẻ', 'Sống'],
+      correct: 0
+    }
+  ]
+};
+
+// Icon library
+const ICONS = ['👻','💀','🦉','🦜','🐦','🦅','🎃','☠️','🦇','👁️','🌑','🔮','⚰️','🕷️','🌙','🦴','🧟','🩸','👿','😈'];
+
+// ============================================================
+//  EDITOR LOGIC
+// ============================================================
+function buildIconGrid() {
+  const grid = document.getElementById('iconGrid');
+  grid.innerHTML = '';
+  ICONS.forEach(ic => {
+    const div = document.createElement('div');
+    div.className = 'icon-opt' + (ic === gameConfig.icon ? ' selected' : '');
+    div.textContent = ic;
+    div.onclick = () => {
+      document.querySelectorAll('.icon-opt').forEach(x => x.classList.remove('selected'));
+      div.classList.add('selected');
+      updateIconPreview(ic);
+      document.getElementById('customIconInput').value = ic;
+    };
+    grid.appendChild(div);
+  });
+}
+
+function updateIconPreview(val) {
+  if (val && val.trim()) {
+    document.getElementById('iconPreview').textContent = val.trim();
+  }
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function buildQuestionsList() {
+  const list = document.getElementById('questionsList');
+  list.innerHTML = '';
+  gameConfig.questions.forEach((q, i) => {
+    const div = document.createElement('div');
+    div.className = 'question-item';
+    div.innerHTML = `
+      <div class="q-header">
+        <span class="q-num">CÂU ${i+1}</span>
+        <button class="btn btn-danger" onclick="removeQuestion(${i})">Xóa</button>
+      </div>
+      <div class="form-group">
+        <label>Loại câu hỏi</label>
+        <input type="text" value="${escHtml(q.type)}" onchange="updateQ(${i},'type',this.value)" placeholder="Dịch từ vựng, Ngữ pháp...">
+      </div>
+      <div class="form-group">
+        <label>Câu hỏi</label>
+        <textarea onchange="updateQ(${i},'question',this.value)" rows="2">${escHtml(q.question)}</textarea>
+      </div>
+      <p style="font-size:0.8rem;color:var(--muted);margin-bottom:6px;">Các lựa chọn (chọn ✓ = đáp án đúng):</p>
+      <div class="q-grid">
+        ${q.choices.map((c,ci) => `
+          <div class="choice-row">
+            <input type="radio" name="correct_${i}" value="${ci}" ${q.correct===ci?'checked':''} onchange="updateQ(${i},'correct',parseInt(this.value))">
+            <label>✓</label>
+            <input type="text" value="${escHtml(c)}" onchange="updateQChoice(${i},${ci},this.value)" placeholder="Đáp án ${ci+1}">
+          </div>
+        `).join('')}
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function updateQ(i, key, val) { gameConfig.questions[i][key] = val; }
+function updateQChoice(i, ci, val) { gameConfig.questions[i].choices[ci] = val; }
+
+function removeQuestion(i) {
+  gameConfig.questions.splice(i, 1);
+  buildQuestionsList();
+}
+
+function addQuestion() {
+  gameConfig.questions.push({
+    type: 'Câu hỏi mới',
+    question: 'Nhập câu hỏi của bạn ở đây?',
+    choices: ['Đáp án A', 'Đáp án B', 'Đáp án C', 'Đáp án D'],
+    correct: 0
+  });
+  buildQuestionsList();
+  setTimeout(() => {
+    const items = document.querySelectorAll('.question-item');
+    items[items.length - 1].scrollIntoView({ behavior: 'smooth' });
+  }, 100);
+}
+
+function readEditorConfig() {
+  const ic = (document.getElementById('customIconInput').value || '').trim();
+  gameConfig.icon = ic || document.querySelector('.icon-opt.selected')?.textContent || '👻';
+  gameConfig.charName = document.getElementById('charName').value || 'Duo';
+  gameConfig.correctSpeeches = document.getElementById('correctSpeeches').value.split('|').map(s=>s.trim()).filter(Boolean);
+  gameConfig.wrongSpeeches = document.getElementById('wrongSpeeches').value.split('|').map(s=>s.trim()).filter(Boolean);
+  gameConfig.maxXP = parseInt(document.getElementById('cfgMaxXP').value) || 100;
+  gameConfig.xpGain = parseInt(document.getElementById('cfgXPGain').value) || 10;
+  gameConfig.xpLoss = parseInt(document.getElementById('cfgXPLoss').value) || 15;
+  gameConfig.hearts = parseInt(document.getElementById('cfgHearts').value) || 3;
+  gameConfig.wrongToHeart = parseInt(document.getElementById('cfgWrongToHeart').value) || 2;
+  gameConfig.winCount = parseInt(document.getElementById('cfgWinCount').value) || 5;
+  gameConfig.deathTitle = document.getElementById('cfgDeathTitle').value || 'Bạn đã chết!';
+  gameConfig.deathMsg = document.getElementById('cfgDeathMsg').value;
+  gameConfig.winTitle = document.getElementById('cfgWinTitle').value || 'Tự do!';
+  gameConfig.winMsg = document.getElementById('cfgWinMsg').value;
+  gameConfig.sounds = {
+    correct: document.getElementById('sfxCorrect').checked,
+    wrong: document.getElementById('sfxWrong').checked,
+    death: document.getElementById('sfxDeath').checked,
+    win: document.getElementById('sfxWin').checked,
+    heart: document.getElementById('sfxLoseHeart').checked
+  };
+}
+
+function populateEditorFromConfig() {
+  document.getElementById('customIconInput').value = gameConfig.icon;
+  document.getElementById('iconPreview').textContent = gameConfig.icon;
+  document.getElementById('charName').value = gameConfig.charName;
+  document.getElementById('correctSpeeches').value = gameConfig.correctSpeeches.join('|');
+  document.getElementById('wrongSpeeches').value = gameConfig.wrongSpeeches.join('|');
+  document.getElementById('cfgMaxXP').value = gameConfig.maxXP;
+  document.getElementById('cfgXPGain').value = gameConfig.xpGain;
+  document.getElementById('cfgXPLoss').value = gameConfig.xpLoss;
+  document.getElementById('cfgHearts').value = gameConfig.hearts;
+  document.getElementById('cfgWrongToHeart').value = gameConfig.wrongToHeart;
+  document.getElementById('cfgWinCount').value = gameConfig.winCount;
+  document.getElementById('cfgDeathTitle').value = gameConfig.deathTitle;
+  document.getElementById('cfgDeathMsg').value = gameConfig.deathMsg;
+  document.getElementById('cfgWinTitle').value = gameConfig.winTitle;
+  document.getElementById('cfgWinMsg').value = gameConfig.winMsg;
+  buildIconGrid();
+  buildQuestionsList();
+}
+
+// ============================================================
+//  GAME STATE
+// ============================================================
+let gs = {
+  xp: 0, hearts: 3, wrongStreak: 0, correctCount: 0,
+  maxStreak: 0, curStreak: 0, questionIndex: 0,
+  shuffledQuestions: [], answered: false
+};
+
+function shuffleArray(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startGame() {
+  readEditorConfig();
+  gs = {
+    xp: 0, hearts: gameConfig.hearts, wrongStreak: 0,
+    correctCount: 0, maxStreak: 0, curStreak: 0, questionIndex: 0,
+    shuffledQuestions: shuffleArray(gameConfig.questions), answered: false
+  };
+  showScreen('game-screen');
+  updateGameUI();
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const qs = gs.shuffledQuestions;
+  if (gs.questionIndex >= qs.length) {
+    // Reshuffle for more questions
+    gs.shuffledQuestions = shuffleArray(gameConfig.questions);
+    gs.questionIndex = 0;
+  }
+  const q = qs[gs.questionIndex];
+  gs.answered = false;
+
+  document.getElementById('questionType').textContent = q.type;
+  document.getElementById('questionText').textContent = q.question;
+  document.getElementById('duoChar').className = 'duo-char';
+  setSpeech(pick(['Hãy trả lời câu hỏi này...', 'Ta đang theo dõi ngươi...', 'Nghĩ kỹ trước khi trả lời!', 'Đừng để ta thất vọng...', 'Sai là ta ám đấy!']));
+
+  // Update progress
+  const pct = Math.min(100, (gs.correctCount / gameConfig.winCount) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+
+  // Build choices
+  const grid = document.getElementById('choicesGrid');
+  grid.innerHTML = '';
+  const shuffledChoices = q.choices.map((c, i) => ({text: c, origIdx: i}));
+  // shuffle choices order
+  const order = shuffleArray(shuffledChoices);
+  order.forEach(ch => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = ch.text;
+    btn.onclick = () => answer(ch.origIdx === q.correct, btn, grid);
+    grid.appendChild(btn);
+  });
+
+  hideFeedback();
+}
+
+function answer(isCorrect, btn, grid) {
+  if (gs.answered) return;
+  gs.answered = true;
+  // disable all
+  grid.querySelectorAll('.choice-btn').forEach(b => b.disabled = true);
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    gs.xp = Math.min(gameConfig.maxXP, gs.xp + gameConfig.xpGain);
+    gs.correctCount++;
+    gs.curStreak++;
+    gs.maxStreak = Math.max(gs.maxStreak, gs.curStreak);
+    gs.wrongStreak = 0;
+    sfx('correct');
+    setDuoMood('happy');
+    setSpeech(pick(gameConfig.correctSpeeches));
+    showXPPopup('+' + gameConfig.xpGain + ' XP', 'gain');
+    showFeedback(true, '🎉 Đúng rồi!', `+${gameConfig.xpGain} XP`);
+    updateGameUI();
+
+    // Check win
+    if (gs.correctCount >= gameConfig.winCount) {
+      setTimeout(showWin, 1200);
+    }
+  } else {
+    btn.classList.add('wrong');
+    gs.xp = Math.max(0, gs.xp - gameConfig.xpLoss);
+    gs.curStreak = 0;
+    gs.wrongStreak++;
+    sfx('wrong');
+    setDuoMood('angry');
+    setSpeech(pick(gameConfig.wrongSpeeches));
+    showXPPopup('-' + gameConfig.xpLoss + ' XP', 'loss');
+
+    // Lose heart?
+    let heartMsg = '';
+    if (gs.wrongStreak >= gameConfig.wrongToHeart) {
+      gs.hearts--;
+      gs.wrongStreak = 0;
+      sfx('heart');
+      heartMsg = '💔 Mất 1 tim!';
+      if (gs.hearts <= 0) {
+        setTimeout(showDeath, 1200);
+        showFeedback(false, '☠️ Sai rồi! ' + heartMsg, '-' + gameConfig.xpLoss + ' XP • Còn 0 tim');
+        updateGameUI();
+        return;
+      }
+    }
+    showFeedback(false, '💀 Sai rồi! ' + heartMsg, '-' + gameConfig.xpLoss + ' XP');
+    updateGameUI();
+  }
+  gs.questionIndex++;
+}
+
+function nextQuestion() {
+  loadQuestion();
+}
+
+function updateGameUI() {
+  // XP bar
+  const pct = (gs.xp / gameConfig.maxXP) * 100;
+  document.getElementById('xpBarFill').style.width = pct + '%';
+  document.getElementById('xpLabel').textContent = gs.xp + ' / ' + gameConfig.maxXP + ' XP';
+  document.getElementById('xpBadge').textContent = '✨ ' + gs.xp + ' XP';
+
+  // Hearts
+  const hd = document.getElementById('heartsDisplay');
+  hd.innerHTML = '';
+  for (let i = 0; i < gameConfig.hearts; i++) {
+    const span = document.createElement('span');
+    span.className = 'heart-icon' + (i >= gs.hearts ? ' lost' : '');
+    span.textContent = '❤️';
+    hd.appendChild(span);
+  }
+
+  // Duo char icon
+  document.getElementById('duoChar').textContent = gameConfig.icon;
+}
+
+function setDuoMood(mood) {
+  const el = document.getElementById('duoChar');
+  el.className = 'duo-char ' + mood;
+  if (mood !== 'neutral') {
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 600);
+  }
+}
+
+function setSpeech(text) {
+  document.getElementById('duoSpeech').textContent = text;
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function showFeedback(isCorrect, text, sub) {
+  const banner = document.getElementById('feedbackBanner');
+  banner.className = 'feedback-banner ' + (isCorrect ? 'correct' : 'wrong');
+  document.getElementById('feedbackText').textContent = text;
+  document.getElementById('feedbackSub').textContent = sub;
+  document.getElementById('continueBtn').textContent = isCorrect ? 'Tiếp tục →' : 'Thử câu tiếp →';
+}
+
+function hideFeedback() {
+  document.getElementById('feedbackBanner').className = 'feedback-banner';
+}
+
+function showXPPopup(text, type) {
+  const el = document.createElement('div');
+  el.className = 'xp-popup ' + type;
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1600);
+}
+
+function spawnParticle() {
+  const el = document.createElement('div');
+  el.className = 'particle';
+  el.textContent = pick(['💀','👻','☠️','🦇','🌑']);
+  el.style.left = Math.random() * 100 + 'vw';
+  el.style.bottom = '0';
+  el.style.animationDuration = (3 + Math.random() * 3) + 's';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 6000);
+}
+
+function showDeath() {
+  sfx('death');
+  document.getElementById('deathDuo').textContent = gameConfig.icon;
+  document.getElementById('deathTitle').textContent = gameConfig.deathTitle;
+  document.getElementById('deathMsg').textContent = gameConfig.deathMsg;
+  document.getElementById('deathXP').textContent = gs.xp;
+  document.getElementById('deathCorrect').textContent = gs.correctCount;
+  document.getElementById('deathStreak').textContent = gs.maxStreak;
+  showScreen('death-screen');
+  for (let i = 0; i < 15; i++) setTimeout(spawnParticle, i * 200);
+}
+
+function showWin() {
+  sfx('win');
+  document.getElementById('winDuo').textContent = gameConfig.icon;
+  document.getElementById('winTitle').textContent = gameConfig.winTitle;
+  document.getElementById('winMsg').textContent = gameConfig.winMsg;
+  document.getElementById('winXP').textContent = gs.xp;
+  document.getElementById('winCorrect').textContent = gs.correctCount;
+  document.getElementById('winStreak').textContent = gs.maxStreak;
+  showScreen('win-screen');
+  startConfetti();
+}
+
+// ============================================================
+//  CONFETTI
+// ============================================================
+function startConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const pieces = Array.from({length: 80}, () => ({
+    x: Math.random() * canvas.width, y: Math.random() * -canvas.height,
+    r: 6 + Math.random() * 8, c: `hsl(${Math.random()*360},90%,60%)`,
+    vx: (Math.random() - 0.5) * 3, vy: 2 + Math.random() * 3, rot: Math.random() * 360
+  }));
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    pieces.forEach(p => {
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.r/2, -p.r/2, p.r, p.r);
+      ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.rot += 3;
+      if (p.y > canvas.height) { p.y = -20; p.x = Math.random() * canvas.width; }
+    });
+    if (document.getElementById('win-screen').classList.contains('active'))
+      requestAnimationFrame(draw);
+  }
+  draw();
+}
+
+// ============================================================
+//  SCREEN NAVIGATION
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'game-screen') {
+    document.getElementById('duoChar').textContent = gameConfig.icon;
+  }
+}
+
+function showTitle() {
+  document.getElementById('titleDuo').textContent = gameConfig.icon;
+  showScreen('title-screen');
+}
+
+function showEditor() {
+  populateEditorFromConfig();
+  showScreen('editor-screen');
+}
+
+function saveAndStart() {
+  readEditorConfig();
+  startGame();
+}
+
+function confirmQuit() {
+  if (confirm('Bỏ cuộc? Duo sẽ không tha thứ đâu...')) showTitle();
+}
+
+// ============================================================
+//  SOUND TOGGLE
+// ============================================================
+document.getElementById('soundToggle').onclick = function() {
+  soundEnabled = !soundEnabled;
+  this.textContent = soundEnabled ? '🔊' : '🔇';
+};
+
+// ============================================================
+//  BG SKULLS
+// ============================================================
+function buildBgSkulls() {
+  const container = document.getElementById('bgSkulls');
+  const skulls = ['💀','👻','☠️','🦴'];
+  for (let i = 0; i < 12; i++) {
+    const el = document.createElement('div');
+    el.className = 'bg-skull';
+    el.textContent = skulls[i % skulls.length];
+    el.style.left = (Math.random() * 100) + '%';
+    el.style.animationDuration = (15 + Math.random() * 20) + 's';
+    el.style.animationDelay = (-Math.random() * 20) + 's';
+    el.style.fontSize = (1 + Math.random() * 2) + 'rem';
+    container.appendChild(el);
+  }
+}
+
+buildBgSkulls();
+populateEditorFromConfig();
+</script>
+</body>
+</html>
